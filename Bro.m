@@ -23,6 +23,10 @@ gamma_a=1.4;
 gamma_GC = 1.33;
 R_a=287.01;
 
+% Temperature massime sopportabili
+Tmax_turb = 1400;
+Tmax_AB = 2100;
+
 
 %% Crociera supersonica
 
@@ -155,9 +159,11 @@ TSFC=m_f./T_subsonic;
 % %plot(f, TSFC)
 % zlim([0, 0.0001])
 
+
+
 for i=1:size(TSFC, 1)
     for j=1:size(TSFC, 2)
-        if TSFC(i, j)<=0 || TSFC(i, j)>=1e-4 || Ttot3(i, j)>1400
+        if TSFC(i, j)<=0 || TSFC(i, j)>=1e-4 || Ttot3(i, j)>Tmax_turb
             TSFC(i, j)=NaN;
         end
     end
@@ -168,7 +174,7 @@ minValue = min(min(TSFC));
 
 for i=1:size(I_sp_a, 1)
     for j=1:size(I_sp_a, 2)
-        if I_sp_a(i, j)<=0 || Ttot3(i, j)>1400
+        if I_sp_a(i, j)<=0 || Ttot3(i, j)>Tmax_turb
             I_sp_a(i, j)=NaN;
         end
     end
@@ -177,23 +183,13 @@ end
 maxValue = max(max(I_sp_a));
 [ind12, ind22] = find(I_sp_a==maxValue);
 
-for i=1:size(I_sp_f, 1)
-    for j=1:size(I_sp_f, 2)
-        if I_sp_f(i, j)<=0 || Ttot3(i, j)>1400
-            I_sp_f(i, j)=NaN;
-        end
-    end
-end
-
-maxValue = max(max(I_sp_f));
-[ind13, ind23] = find(I_sp_f==maxValue);
-
 figure()
     t=surf(f, b, I_sp_a');
+    view([1, 1, 0.25])
     t.EdgeColor='none';
     pbaspect([1, 1, 1])
     hold on;
-    plot(f(ind12), b(ind22),'o')
+    plot3(f(ind12), b(ind22), I_sp_a(ind12, ind22),'o', 'Color', 'r', 'MarkerFaceColor','r')
     x=t.XData;
     y=t.YData;
     z=t.ZData;
@@ -222,10 +218,11 @@ figure()
 
 figure()
     t=surf(f, b, TSFC');
+    view([1, 1, 1])
     t.EdgeColor='none';
-    pbaspect([1, 1, 2])
+    pbaspect([1, 1, 1])
     hold on;
-    plot3(f(ind12), b(ind22),TSFC(ind12, ind22),'o')
+    plot3(f(ind12), b(ind22),TSFC(ind12, ind22),'o', 'Color', 'r', 'MarkerFaceColor','r')
 
 % TSFC diminuisce con beta; per ogni beta ha un ottimo su f
 % I_sp_a ha un ottimo a un certo beta e un certo f
