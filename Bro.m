@@ -12,6 +12,7 @@ H_f=42000000;
 eta_t=0.92;
 eta_c =0.92;
 
+
 % Caratteristiche aria e GC
 cp_GC=1150;
 cp_a=1000;
@@ -20,10 +21,11 @@ gamma_GC = 1.3;
 R_a=287.01;
 
 % Aria a 25km
-p_25000=0.054*101325; % Sbagliato
-T_25000=216;
+
 
 %% Crociera supersonica
+p_25000= 2549; 
+T_25000= 216.65;
 
 f=0.0045:0.0001:0.1;
 
@@ -51,19 +53,21 @@ m_f =f.*m_a;
 % Parametri di merito
 I_sp = T_supercruise./m_a;
 TSFC=m_f./T_supercruise;
-
+figure()
 plot(f, TSFC*3600);
 legend("$TSFC$", "$I_sp}$", "$ve$", 'Interpreter','latex');
 
 
 %% Regime subsonico
+p_12000= 19267; % Sbagliato
+T_12000= 216.65;
 
-f=(0.001:0.0001:0.05)';
-%b=(2:0.1:20);
+f=(0.0045:0.00001:0.01)';
+b=(2:0.01:25);
 
 fmat = f*ones(1, max(size(b)));
-%bmat = ones(max(size(f)), 1)*b;
-bmat=7;
+bmat = ones(max(size(f)), 1)*b;
+%bmat=7;
 
 % Regime subsonico
 M_subsonic = 0.85;
@@ -76,14 +80,20 @@ ptot1=p_25000*( 1+(gamma_a-1)/2*M_subsonic^2 )^(gamma_a/(gamma_a-1))*pi_presa;
 
 % Compressore
 ptot2=ptot1.*(bmat);
-Ttot2=(bmat).^((gamma_a-1)/gamma_a);
+Ttot2 = Ttot1.*(bmat).^((gamma_a-1)/gamma_a);
+%compressore reale:
+%T2_id = Ttot1*(Ptot2/Ptot1)^( (gamma_a - 1) / gamma_a)
+%Ttot2 = Ttot1 + (T2_id - Ttot1)/eta_c
 
 % C.C.
 ptot3=pi_b.*ptot2;
-Ttot3=(cp_GC*Ttot2+fmat.*H_f*eta_b).\( ((1+fmat).*cp_GC) );
+Ttot3= (cp_a.*Ttot2 + f .* H_f.*eta_b)./((1+f).*cp_GC);
 
 % Turbina
 Ttot4 = Ttot3 - (1/(eta_c*eta_t)).*( cp_a./((1+fmat).*cp_GC) ).* (Ttot2-Ttot1);
+%turbina reale:
+%T4_id = Ttot3 - (Ttot4 - Ttot3)./eta_t
+%ptot4 = ptot3.*(T4_id./Ttot3).^((gamma_a-1)/gamma_a);
 ptot4 = ptot3.*(Ttot4./Ttot3).^(gamma_GC/(gamma_GC-1));
 
 % Ugello
@@ -95,5 +105,15 @@ m_f =fmat.*m_a;
 I_sp = T_subsonic./m_a;
 TSFC=m_f./T_subsonic;
 
-plot(f, TSFC(:, 1))
-legend("$\dot{m}_f$", "$\dot{m}_a$", "$ve$", 'Interpreter','latex')
+[mins, min_id] = min(TSFC(:, 1:end));
+f_min = f(min_id);
+
+figure()
+plot(b, f_min);
+
+%plot(f, TSFC(:, 1))
+figure()
+%surf(TSFC)
+plot(f, TSFC)
+ylim([-0.001, 0.001])
+%legend("$\dot{m}_f$", "$\dot{m}_a$", "$ve$", 'Interpreter','latex')
