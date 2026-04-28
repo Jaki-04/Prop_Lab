@@ -1,100 +1,99 @@
 clc
 clearvars;
 
-f=0:0.0001:1;
+% Rendimenti e parametri
+pi_AB=0.97;
+pi_b=0.98;
+pi_presa = 0.8;
+eta_b=0.98;
+eta_AB=0.92;
+eta_n = 0.95;
+H_f=42000000;
+eta_t=0.92;
+eta_c =0.92;
 
+% Caratteristiche aria e GC
+cp_GC=1150;
+cp_a=1000;
+gamma_a=1.4;
+gamma_GC = 1.3;
+R_a=287.01;
+
+% Aria a 25km
 p_25000=0.054*101325; % Sbagliato
 T_25000=216;
-Msup = 3.5;
-pi_AB=0.97;
-cp_GC=1300;
-gamma=1.4;
-gamma_CG = 1.3;
-R=287.01;
-v0 = Msup*sqrt(gamma*R*T_25000);
-DH=42000000;
-eta=0.92;
-T=65000;
 
-pi_presa = 0.8;
-Ttot1=T_25000*(1+(gamma-1)/2*Msup^2);
-ptot1=p_25000*(1+(gamma-1)/2*Msup^2)^(gamma/(gamma-1))*pi_presa;
+%% Crociera supersonica
 
+f=0.0045:0.0001:0.1;
+
+% Crociera supersonica
+M_supercruise = 3.5;
+v0 = M_supercruise*sqrt(gamma_a*R_a*T_25000);
+T_supercruise=65000;
+
+% Presa
+Ttot1=T_25000*(1+(gamma_a-1)/2*M_supercruise^2);
+ptot1=p_25000*(1+(gamma_a-1)/2*M_supercruise^2)^(gamma_a/(gamma_a-1))*pi_presa;
+
+% AB
 ptot2=pi_AB*ptot1;
-Ttot2=(cp_GC*Ttot1+f*DH*eta)./((1+f)*cp_GC);
+Ttot2=(cp_a*Ttot1+f*H_f*eta_AB)./((1+f)*cp_GC);
 
-ve = sqrt( 2*cp_GC*Ttot2*( 1-(p_25000/ptot2).^(gamma_CG-1)/(gamma_CG)) );
+% Ugello
+T_ratio = 1-(p_25000/ptot2).^( (gamma_GC-1)/(gamma_GC) );
+ve = sqrt( 2*cp_GC*Ttot2*T_ratio);
 
-m_a=T./((1+f).*ve-v0);
-
-I_sp = T./m_a;
-TSFC=m_a.*f./T;
+% Portata d'aria target e portata massica corrispondente
+m_a=T_supercruise./((1+f).*ve-v0);
 m_f =f.*m_a;
-plot(f, m_f, f, m_a, f, ve.*0.01);
-legend("$\dot{m}_f$", "$\dot{m}_a$", "$ve$", 'Interpreter','latex');
 
-min=m_f(1);
-minf=f(1);
-for i=1:max(size(f))
-    if m_f(i)<min
-        min = m_f(i);
-        minf=f(i);
-    end
-end
-min_vec=ones(10, 1)*minf;
-hold on
-%plot(min_vec, 0:9, '--r')
+% Parametri di merito
+I_sp = T_supercruise./m_a;
+TSFC=m_f./T_supercruise;
 
-%%
+plot(f, TSFC*3600);
+legend("$TSFC$", "$I_sp}$", "$ve$", 'Interpreter','latex');
 
-%f=(0.002:0.0001:0.005)';
-b=(2:0.1:20);
 
-%fmat = f*ones(1, max(size(b)));
-bmat = ones(max(size(f)), 1)*b;
+%% Regime subsonico
 
-fmat = 0.003;
+f=(0.001:0.0001:0.05)';
+%b=(2:0.1:20);
 
-m_f =2;
-m_a=m_f/fmat;
+fmat = f*ones(1, max(size(b)));
+%bmat = ones(max(size(f)), 1)*b;
+bmat=7;
 
-cp_GC = 1155;
-cp_a = 1000;
-gamma=1.4;
-gamma_GC = 1.33;
-Msub = 0.85;
-pi_presa = 0.8;
-pi_camera = 0.97;
-eta=0.97;
-DH = 42000000;
-etac =0.92;
-etat=0.92;
-T=12000;
-R=287.01;
+% Regime subsonico
+M_subsonic = 0.85;
+T_subsonic=12000;
+v0 = M_subsonic*sqrt(gamma_a*R_a*T_25000);
 
-p_25000=0.054*101325; 
-T_25000=0;
-v0 = Msub*sqrt(gamma*R*T_25000);
+% Presa
+Ttot1=T_25000*( 1+(gamma_a-1)/2*M_subsonic^2 );
+ptot1=p_25000*( 1+(gamma_a-1)/2*M_subsonic^2 )^(gamma_a/(gamma_a-1))*pi_presa;
 
-Ttot1=T_25000*( 1+(gamma-1)/2*Msub^2 );
-ptot1=p_25000*( 1+(gamma-1)/2*Msub^2 )^(gamma/(gamma-1))*pi_presa;
-
+% Compressore
 ptot2=ptot1.*(bmat);
-Ttot2=(bmat).^((gamma-1)/gamma);
+Ttot2=(bmat).^((gamma_a-1)/gamma_a);
 
-ptot3=pi_camera.*ptot2;
-Ttot3=(cp_GC*Ttot2+fmat.*DH*eta).\( ((1+fmat).*cp_GC));
+% C.C.
+ptot3=pi_b.*ptot2;
+Ttot3=(cp_GC*Ttot2+fmat.*H_f*eta_b).\( ((1+fmat).*cp_GC) );
 
+% Turbina
+Ttot4 = Ttot3 - (1/(eta_c*eta_t)).*( cp_a./((1+fmat).*cp_GC) ).* (Ttot2-Ttot1);
+ptot4 = ptot3.*(Ttot4./Ttot3).^(gamma_GC/(gamma_GC-1));
 
-Ttot4 = Ttot3 - (1/(etac*etat)).*( cp_a./((1+fmat).*cp_GC) ).* (Ttot2-Ttot1);
-ptot4 = 0.97*ptot3;
+% Ugello
+ve = sqrt( 2.*cp_GC.*Ttot2.*( 1-(p_25000./ptot4).^( (gamma_GC-1)./(gamma_GC) ) ) );
+m_a=T_subsonic./((1+fmat).*ve-v0);
+m_f =fmat.*m_a;
 
-ve = sqrt( 2.*cp_GC.*Ttot2.*( 1-(p_25000./ptot2).^(gamma_GC-1)./(gamma_GC)) );
+% Parametri di merito
+I_sp = T_subsonic./m_a;
+TSFC=m_f./T_subsonic;
 
-%m_a=T./((1+fmat).*ve-v0);
-T =  ((1+fmat)*ve-v0)*m_a;
-% I_sp = T./m_a;
-% TSFC=m_a.*fmat./T;
-% m_f =fmat.*m_a;
-plot(bmat(1, :), T)
+plot(f, TSFC(:, 1))
 legend("$\dot{m}_f$", "$\dot{m}_a$", "$ve$", 'Interpreter','latex')
