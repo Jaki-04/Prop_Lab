@@ -4,17 +4,16 @@ clearvars;
 % Rendimenti e parametri
 pi_noAB=0.95;       % Fissato
 pi_AB = 0.98;       % Fissato
-pi_b=0.98;
+pi_b=0.98;          % Fissato
 pi_d = 0.97;        % Fissato
 pi_presa = 0.8;     % Fissato (presa obiettivo)
 eta_b=0.98;         % Fissato
 eta_AB=0.92;
 eta_n = 0.92;
-eta_t = 0.95;       % Da determinare con il rendimento politropico
-eta_c = 0.95;       % Da determinare con il rendimento politropico
+et=0.9;
+ec=0.9;
 H_f=43000000;       % Fissato
-eta_m_t=0.92;
-eta_m_c =0.92;
+eta_m=0.92;
 
 
 % Caratteristiche aria e GC
@@ -65,11 +64,12 @@ legend("$TSFC$", "$I_sp}$", "$ve$", 'Interpreter','latex');
 
 %% Regime subsonico
 
+% Aria a 12km
 p_12000= 19267; 
 T_12000= 216.65;
 
-f=(0.01:0.0001:0.03)';
-b=(3:0.1:30);
+f=(0.01:0.0001:0.04)';
+b=(2:0.05:40);
 
 fmat = f*ones(1, max(size(b)));
 bmat = ones(max(size(f)), 1)*b;
@@ -84,10 +84,11 @@ Ttot1=T_12000*( 1+(gamma_a-1)/2*M_subsonic^2 );
 ptot1=p_12000*( 1+(gamma_a-1)/2*M_subsonic^2 )^(gamma_a/(gamma_a-1))*pi_presa;
 
 % Compressore
-ptot2=ptot1.*(bmat);
-Ttot2_id = Ttot1.*(bmat).^((gamma_a-1)/gamma_a);
+ptot2=ptot1.*bmat;
+Ttot2_id = Ttot1.*( bmat.^((gamma_a-1)/gamma_a) );
 % Compressore reale:
-Ttot2 = Ttot1 + (Ttot2_id - Ttot1)/eta_c;
+eta_c = ( bmat.^( (gamma_a-1)./gamma_a ) - 1 )./( bmat.^( (gamma_a-1)./(gamma_a*ec) ) - 1 );
+Ttot2 = Ttot1 + (Ttot2_id - Ttot1)./eta_c;
 
 % Diffusore
 ptot_diff = pi_d*ptot2;
@@ -97,13 +98,14 @@ ptot3=pi_b.*ptot_diff;
 Ttot3= (cp_a.*Ttot2 + f .* H_f.*eta_b)./((1+f).*cp_GC);
 
 % Turbina reale
-Ttot4 = Ttot3 - (1/(eta_m_c*eta_m_t)).*( cp_a./((1+fmat).*cp_GC) ).* (Ttot2-Ttot1);
+Ttot4 = Ttot3 - (1/eta_m).*( cp_a./((1+fmat).*cp_GC) ).* (Ttot2-Ttot1);
 % Turbina ideale
-Ttot4_id = Ttot3 + (Ttot4 - Ttot3)./eta_t;
-ptot4 = ptot3.*(Ttot4_id./Ttot3).^(gamma_GC/(gamma_GC-1));
+tau_T= Ttot4./Ttot3;
+pi_t = tau_T.^( gamma_GC./( et.*(gamma_GC-1)) );
+ptot4 = ptot3.*pi_t;
 
 % Post bruciatore (spento)
-ptot_AB = ptot4*pi_noAB;
+ptot_AB = ptot4.*pi_noAB;
 Ttot_AB = Ttot4;
 
 % Ugello
@@ -113,42 +115,117 @@ m_a=T_subsonic./((1+fmat).*ve-v0);
 m_f =fmat.*m_a;
 
 % Parametri di merito
-I_sp = T_subsonic./m_a;
+I_sp_a = T_subsonic./m_a;
 TSFC=m_f./T_subsonic;
 
 % Ricerca del minimo
 
-f_min = zeros(1, length(b));
-b_fmin=zeros(1, length(b));
-fmin_id = zeros(1, length(b));
-bmin_id=zeros(1, length(b));
+% f_min = zeros(1, length(b));
+% b_fmin=zeros(1, length(b));
+% fmin_id = zeros(1, length(b));
+% bmin_id=zeros(1, length(b));
 
-for i = 1:max(size(b))
-    [maximum, max_id] = max(TSFC(1:end, i));
-    if max_id>=max(size(f))
-        break
-    else
-        [minimum, min_id] = min(abs(TSFC(max_id:end, i)));
-        f_min(i) = f(min_id+max_id-1);
-        fmin_id(i) = min_id;
-        bmin_id(i) = i;
-        b_fmin(i) = b(i);
+% for i = 1:max(size(b))
+%     [maximum, max_id] = max(TSFC(1:end, i));
+%     if max_id>=max(size(f))
+%         break
+%     else
+%         [minimum, min_id] = min(abs(TSFC(max_id:end, i)));
+%         f_min(i) = f(min_id+max_id-1);
+%         fmin_id(i) = min_id;
+%         bmin_id(i) = i;
+%         b_fmin(i) = b(i);
+%     end
+% end
+% 
+% figure()
+% plot(b_fmin, f_min);
+
+% figure()
+% hold on
+% t=surf(f, b, I_sp');
+% t.EdgeColor='none';
+
+% TSFCmin=zeros(1, length(b));
+% for i=1:length(fmin_id)
+%     TSFCmin(i) = TSFC(fmin_id(i), bmin_id(i));
+% end
+% plot3(f_min, b_fmin, TSFCmin', '--k')
+% pbaspect([1 2 3])
+% %plot(f, TSFC)
+% zlim([0, 0.0001])
+
+for i=1:size(TSFC, 1)
+    for j=1:size(TSFC, 2)
+        if TSFC(i, j)<=0 || TSFC(i, j)>=1e-4 || Ttot3(i, j)>1400
+            TSFC(i, j)=NaN;
+        end
     end
 end
 
-figure()
-plot(b_fmin, f_min);
+minValue = min(min(TSFC));
+[ind11, ind21] = find(TSFC==minValue);
 
-figure()
-hold on
-t=surf(f, b, TSFC');
-t.EdgeColor='none';
-
-TSFCmin=zeros(1, length(b));
-for i=1:length(fmin_id)
-    TSFCmin(i) = TSFC(fmin_id(i), bmin_id(i));
+for i=1:size(I_sp_a, 1)
+    for j=1:size(I_sp_a, 2)
+        if I_sp_a(i, j)<=0 || Ttot3(i, j)>1400
+            I_sp_a(i, j)=NaN;
+        end
+    end
 end
-plot3(f_min, b_fmin, TSFCmin', '--k')
-pbaspect([1 2 3])
-%plot(f, TSFC)
-zlim([0, 0.0001])
+
+maxValue = max(max(I_sp_a));
+[ind12, ind22] = find(I_sp_a==maxValue);
+
+for i=1:size(I_sp_f, 1)
+    for j=1:size(I_sp_f, 2)
+        if I_sp_f(i, j)<=0 || Ttot3(i, j)>1400
+            I_sp_f(i, j)=NaN;
+        end
+    end
+end
+
+maxValue = max(max(I_sp_f));
+[ind13, ind23] = find(I_sp_f==maxValue);
+
+figure()
+    t=surf(f, b, I_sp_a');
+    t.EdgeColor='none';
+    pbaspect([1, 1, 1])
+    hold on;
+    plot(f(ind12), b(ind22),'o')
+    x=t.XData;
+    y=t.YData;
+    z=t.ZData;
+    %%Create vectors out of surface's XData and YData
+    x=x(:,1);
+    y=y(1,:);
+    %%Divide the lengths by the number of lines needed
+    xnumlines = 50; % 10 lines
+    ynumlines =50; % 10 partitions
+    xspacing = round(length(x)/xnumlines);
+    yspacing = round(length(y)/ynumlines);
+    %%Plot the mesh lines 
+    % Plotting lines in the X-Z plane
+    hold on
+    for i = 1:yspacing:length(y)
+        Y1 = y(i)*ones(size(x)); % a constant vector
+        Z1 = z(i,:);
+        plot3(x,Y1,Z1,'-k');
+    end
+    % Plotting lines in the Y-Z plane
+    for i = 1:xspacing:length(x)
+        X2 = x(i)*ones(size(y)); % a constant vector
+        Z2 = z(:,i);
+        plot3(X2,y,Z2,'-k');
+    end
+
+figure()
+    t=surf(f, b, TSFC');
+    t.EdgeColor='none';
+    pbaspect([1, 1, 2])
+    hold on;
+    plot3(f(ind12), b(ind22),TSFC(ind12, ind22),'o')
+
+% TSFC diminuisce con beta; per ogni beta ha un ottimo su f
+% I_sp_a ha un ottimo a un certo beta e un certo f
