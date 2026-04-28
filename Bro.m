@@ -62,8 +62,8 @@ legend("$TSFC$", "$I_sp}$", "$ve$", 'Interpreter','latex');
 p_12000= 19267; % Sbagliato
 T_12000= 216.65;
 
-f=(0.0045:0.00001:0.01)';
-b=(2:0.01:25);
+f=(0.0045:0.00001:0.02)';
+b=(3:0.01:12);
 
 fmat = f*ones(1, max(size(b)));
 bmat = ones(max(size(f)), 1)*b;
@@ -72,18 +72,17 @@ bmat = ones(max(size(f)), 1)*b;
 % Regime subsonico
 M_subsonic = 0.85;
 T_subsonic=12000;
-v0 = M_subsonic*sqrt(gamma_a*R_a*T_25000);
+v0 = M_subsonic*sqrt(gamma_a*R_a*T_12000);
 
 % Presa
-Ttot1=T_25000*( 1+(gamma_a-1)/2*M_subsonic^2 );
-ptot1=p_25000*( 1+(gamma_a-1)/2*M_subsonic^2 )^(gamma_a/(gamma_a-1))*pi_presa;
+Ttot1=T_12000*( 1+(gamma_a-1)/2*M_subsonic^2 );
+ptot1=p_12000*( 1+(gamma_a-1)/2*M_subsonic^2 )^(gamma_a/(gamma_a-1))*pi_presa;
 
 % Compressore
 ptot2=ptot1.*(bmat);
-Ttot2 = Ttot1.*(bmat).^((gamma_a-1)/gamma_a);
+Ttot2_id = Ttot1.*(bmat).^((gamma_a-1)/gamma_a);
 %compressore reale:
-%T2_id = Ttot1*(Ptot2/Ptot1)^( (gamma_a - 1) / gamma_a)
-%Ttot2 = Ttot1 + (T2_id - Ttot1)/eta_c
+Ttot2 = Ttot1 + (Ttot2_id - Ttot1)/eta_c;
 
 % C.C.
 ptot3=pi_b.*ptot2;
@@ -92,12 +91,11 @@ Ttot3= (cp_a.*Ttot2 + f .* H_f.*eta_b)./((1+f).*cp_GC);
 % Turbina
 Ttot4 = Ttot3 - (1/(eta_c*eta_t)).*( cp_a./((1+fmat).*cp_GC) ).* (Ttot2-Ttot1);
 %turbina reale:
-%T4_id = Ttot3 - (Ttot4 - Ttot3)./eta_t
-%ptot4 = ptot3.*(T4_id./Ttot3).^((gamma_a-1)/gamma_a);
-ptot4 = ptot3.*(Ttot4./Ttot3).^(gamma_GC/(gamma_GC-1));
+Ttot4_id = Ttot3 + (Ttot4 - Ttot3)./eta_t;
+ptot4 = ptot3.*(Ttot4_id./Ttot3).^(gamma_GC/(gamma_GC-1));
 
 % Ugello
-ve = sqrt( 2.*cp_GC.*Ttot2.*( 1-(p_25000./ptot4).^( (gamma_GC-1)./(gamma_GC) ) ) );
+ve = sqrt( 2.*cp_GC.*Ttot2.*( 1-(p_12000./ptot4).^( (gamma_GC-1)./(gamma_GC) ) ) );
 m_a=T_subsonic./((1+fmat).*ve-v0);
 m_f =fmat.*m_a;
 
@@ -105,11 +103,22 @@ m_f =fmat.*m_a;
 I_sp = T_subsonic./m_a;
 TSFC=m_f./T_subsonic;
 
-[mins, min_id] = min(TSFC(:, 1:end));
-f_min = f(min_id);
+% Ricerca del minimo
+
+
+for i = 1:max(size(b))
+    [maximum, max_id] = max(TSFC(1:end, i));
+    if max_id>=max(size(f))
+        break
+    else
+        [minimum, min_id] = min(abs(TSFC(max_id:end, i)));
+        f_min(i) = f(min_id+max_id-1);
+        b_fmin(i) = b(i);
+    end
+end
 
 figure()
-plot(b, f_min);
+plot(b_fmin, f_min);
 
 %plot(f, TSFC(:, 1))
 figure()
