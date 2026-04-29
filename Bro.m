@@ -1,4 +1,6 @@
-clc
+%% Studio parametrico - Crociera supersonica
+
+clc;
 clearvars;
 
 % Rendimenti e parametri
@@ -14,7 +16,7 @@ et=0.9;
 ec=0.9;
 H_f=43000000;       % Fissato
 eta_m=0.92;
-
+Tmax_AB = 2100;
 
 % Caratteristiche aria e GC
 cp_GC=1150;
@@ -22,13 +24,6 @@ cp_a=1000;
 gamma_a=1.4;
 gamma_GC = 1.33;
 R_a=287.01;
-
-% Temperature massime sopportabili
-Tmax_turb = 1400;
-Tmax_AB = 2100;
-
-
-%% Crociera supersonica
 
 % Aria a 25km
 p_25000= 2549; 
@@ -66,7 +61,32 @@ ylim([0.001, 0.5])
 legend("$TSFC$", "$I_sp}$", "$ve$", 'Interpreter','latex');
 
 
-%% Regime subsonico
+%% Studio Parametrico - Regime subsonico
+
+clc
+clearvars;
+
+% Rendimenti e parametri
+pi_noAB=0.95;       % Fissato
+pi_AB = 0.98;       % Fissato
+pi_b=0.98;          % Fissato
+pi_d = 0.97;        % Fissato
+pi_presa = 0.8;     % Fissato (presa obiettivo)
+eta_b=0.98;         % Fissato
+eta_AB=0.92;
+eta_n = 0.92;
+et=0.9;
+ec=0.9;
+H_f=43000000;       % Fissato
+eta_m=0.92;
+Tmax_turb = 1400;
+
+% Caratteristiche aria e GC
+cp_GC=1150;
+cp_a=1000;
+gamma_a=1.4;
+gamma_GC = 1.33;
+R_a=287.01;
 
 % Aria a 12km
 p_12000= 19267; 
@@ -226,3 +246,91 @@ figure()
 
 % TSFC diminuisce con beta; per ogni beta ha un ottimo su f
 % I_sp_a ha un ottimo a un certo beta e un certo f
+
+%% Presa d'aria supersonica
+
+clc;
+clearvars;
+
+M_supercruise = 3.5;        % Mach di ingresso alla presa
+gamma_a =1.4;               % gamma dell'aria
+
+% Angoli del cono e i due angoli di rampa (uguali) su cui ciclare
+cone_angles = deg2rad(5:0.1:20);
+ramp_angles = deg2rad(5:0.1:18);
+
+% Inizializzazione parametri
+p_grid = zeros(length(cone_angles), length(ramp_angles));
+p_tot_ratio_max =0;
+idx=1;
+options = optimoptions('fsolve','Display','none');
+
+% Funzioni utili
+
+    % Funzione angolo di deflessione --> angolo dell'onda
+    alpha_fun = @(M,alpha) atan(2.*cot(alpha).*((M.^2.*sin(alpha).^2)-1)./(M.^2.*(gamma_a+cos(2.*alpha)) + 2));
+    
+    % Funzione Mach di uscita dall'onda
+    M_exit = @(M, alpha, delta) sqrt( (1./sin(alpha-delta).^2) .* (1+M.^2.*sin(alpha).^2.*(gamma_a-1)/2) ./ (gamma_a.*M.^2.*sin(alpha).^2-(gamma_a-1)/2) );
+    
+    % Funzione perdita di pressione totale a cavallo dell'onda
+    p_tot_ratio = @(Mn) ( ((gamma_a+1).*Mn.^2./(2+(gamma_a-1).*Mn.^2)).^(gamma_a./(gamma_a-1))).*((gamma_a+1)./(2.*gamma_a.*Mn.^2-gamma_a+1)).^(1/(gamma_a-1));
+
+
+% Ciclo sugli angoli del cono di ingresso
+for delta_cone = cone_angles
+
+    % Prima onda obliqua
+    alpha1 = fsolve(@(alpha) alpha_fun(M_supercruise, alpha)-delta_cone, deg2rad(35), options);
+    M1=M_exit(M_supercruise, alpha1, delta_cone);
+    Mn_supercruise = M_supercruise.*sin(alpha1);
+    
+    % Seconda onda obliqua
+    alpha2 = fsolve(@(alpha) alpha_fun(M1, alpha)-ramp_angles, deg2rad(45)*ones(size(ramp_angles)), options);
+    M2=M_exit(M1, alpha2, ramp_angles);
+    Mn1 = M1.*sin(alpha2);
+    
+    % Terza onda obliqua
+    alpha3 = fsolve(@(alpha) alpha_fun(M2,alpha)-ramp_angles, deg2rad(55)*ones(size(ramp_angles)), options);
+    M3=M_exit(M2, alpha3, ramp_angles);
+    Mn2 = M2.*sin(alpha3);
+    
+    % Onda normale
+    alpha4 = pi/2;
+    M4 = M_exit(M3, alpha4, zeros(size(ramp_angles)));
+    Mn3 = M3.*sin(alpha4);
+    
+    % Perdita complessiva 
+    p_tot_final_ratio = p_tot_ratio(Mn_supercruise).*p_tot_ratio(Mn1).*p_tot_ratio(Mn2).*p_tot_ratio(Mn3);
+    
+    % Troncamento risultati antifisici
+    for i=1:length(p_tot_final_ratio)
+        if Mn1(i)<1 || Mn2(i)<1 || Mn3(i)<1
+            p_tot_final_ratio(i) = NaN;
+        end
+    end
+    
+    % Riempio la colonna di p_grid
+    p_grid(idx, :) = p_tot_final_ratio;
+    idx=idx+1;
+    
+    % Ricerca ottimo dell'iterazione corrente
+    [currmax, ramp_id] = max(p_tot_final_ratio);
+    if currmax > p_tot_ratio_max
+        p_tot_ratio_max = currmax;
+        ramp_max = ramp_angles(ramp_id);
+        cone_max = delta_cone;
+    end
+end
+
+% Plot della curva del rendimento della presa
+figure()
+    s=surf(rad2deg(cone_angles), rad2deg(ramp_angles), p_grid');
+    s.EdgeColor = 'none';
+    hold on
+    plot3(rad2deg(cone_max), rad2deg(ramp_max), p_tot_ratio_max, 'o', 'MarkerFaceColor', 'r')
+    xlabel('Cone Angle')
+    ylabel('Ramp angles')
+    zlabel('$\pi_d$', 'Interpreter','latex')
+
+sprintf('Rendimento massimo della presa pi_d=%f con valori delta_cone=%f°, delta_ramp=%f° ', p_tot_ratio_max, rad2deg(cone_max), rad2deg(ramp_max))
