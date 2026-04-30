@@ -60,7 +60,7 @@ if ismember('plot', varargin)
     yline(TSFC_min*3600, '--k');
     plot(f(F_min), TSFC_min*3600, 'o', 'MarkerFaceColor', 'r');
     ylim([0.001, 0.5])
-    legend("$TSFC$", "$I_sp}$", "$ve$", 'Interpreter','latex');
+    legend("$TSFC$","", "$TSFC_{min}$", 'Interpreter','latex');
 end
 
 supCruise.m_a=m_a(F_min);

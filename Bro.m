@@ -7,7 +7,7 @@ rho=Air.rho;
 g = Air.g; 
 R = Air.R;
 
-supCruise = Supercruise_parameters('plot');
+supCruise = Supercruise_parameters();
 
 M = supCruise.M;        % Mach di ingresso alla presa
 v0 = supCruise.v0;
@@ -140,10 +140,34 @@ p_f = p*p_ratio_fin;
 rho_f=p_f/(R*T_f);
 v0_f = M4_fin*sqrt(g*R*T_f);
 
-h=(H-l1*tan(cone_fin)-l2*tan(cone_fin+ramp_fin)-l3*tan(cone_fin+2*ramp_fin))/cos(cone_fin+2*ramp_fin);  % Altezza anulo
 delta_anulo = cone_fin+2*ramp_fin;
-A_anulo= sqrt( supCruise.m_a/ (pi*rho_f*v0_f));         % Area dell'anulo
+A_anulo= supCruise.m_a/ (rho_f*v0_f);         % Area dell'anulo
 fun = @(l) pi*(H^2*l-H/tan(delta_anulo)*l^2+1/(3*tan(delta_anulo)^2)*l^3)-A_anulo;
-zf = fsolve(fun, 0.2);
+zf = fsolve(fun, 0.4);
 rf = H-zf/(tan(delta_anulo));
-h_anulo=(H-rf)/cos(delta_anulo);
+h_anulo=(H-rf)/cos(delta_anulo);        % Dovrebbe venire 0.42286
+h_anulo = 0.42286;
+
+%% Presa subsonica
+
+h_anulo = 0.42286;
+Air = Air_parameters('12000');
+p=Air.p;
+T=Air.T;
+rho=Air.rho;
+g = Air.g; 
+R = Air.R;
+
+subCruise = Subcruise_parameters();
+M = subCruise.M;
+v0 = subCruise.v0;
+m_a = subCruise.m_a;
+
+% Sezione di ingresso subsonica
+A_anulo_sub = m_a/(rho*v0);
+R_top = sqrt(H^2-A_anulo_sub/pi);     % Raggio necessario alla sommità della spina per avere l'area richiesta
+h0_duct = H-R_top;     % Altezza iniziale della strozzatura di ingresso in subsonico
+fun = @(l) pi*(H^2*l-H/tan(delta_anulo)*l^2+1/(3*tan(delta_anulo)^2)*l^3)-A_anulo_sub;
+zf = fsolve(fun, 0.4);
+rf = H-zf/(tan(delta_anulo));
+h_anulo=(H-rf)/cos(delta_anulo); 

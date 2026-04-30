@@ -36,7 +36,7 @@ bmat = ones(max(size(f)), 1)*b;
 
 % Regime subsonico
 M_subsonic = 0.85;
-T_subsonic=12000;
+T_subsonic=25000;
 v0_subsonic = M_subsonic*sqrt(g_a*R_a*T);
 
 % Presa
