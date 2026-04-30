@@ -1,16 +1,14 @@
 %% Studio Parametrico - Regime subsonico
 
 
-function [m_a, f, I_sp_a, TSFC] = Subcruise_parameters()
+function subCruise = Subcruise_parameters(varargin)
 
 % Rendimenti e parametri
 pi_noAB=0.95;       % Fissato
-pi_AB = 0.98;       % Fissato
 pi_b=0.98;          % Fissato
 pi_d = 0.97;        % Fissato
 pi_presa = 0.8;     % Fissato (presa obiettivo)
 eta_b=0.98;         % Fissato
-eta_AB=0.92;
 eta_n = 0.92;
 et=0.9;
 ec=0.9;
@@ -20,15 +18,15 @@ Tmax_turb = 1400;
 
 % Caratteristiche aria e GC
 cp_GC=1150;
-cp_a=1000;
-gamma_a=1.4;
-gamma_GC = 1.33;
-R_a=287.01;
+g_GC = 1.33;
 
 % Aria a 12km
-p_12000= 19267; 
-T_12000= 216.65;
-rho_12000 = p_12000/(R_a*T_12000);
+Air = Air_parameters('12000');
+p= Air.p; 
+T= Air.T;
+cp_a = Air.cp;
+g_a = Air.g;
+R_a = Air.R;
 
 f=(0.01:0.0001:0.04)';
 b=(2:0.05:40);
@@ -39,17 +37,17 @@ bmat = ones(max(size(f)), 1)*b;
 % Regime subsonico
 M_subsonic = 0.85;
 T_subsonic=12000;
-v0_subsonic = M_subsonic*sqrt(gamma_a*R_a*T_12000);
+v0_subsonic = M_subsonic*sqrt(g_a*R_a*T);
 
 % Presa
-Ttot1=T_12000*( 1+(gamma_a-1)/2*M_subsonic^2 );
-ptot1=p_12000*( 1+(gamma_a-1)/2*M_subsonic^2 )^(gamma_a/(gamma_a-1))*pi_presa;
+Ttot1=T*( 1+(g_a-1)/2*M_subsonic^2 );
+ptot1=p*( 1+(g_a-1)/2*M_subsonic^2 )^(g_a/(g_a-1))*pi_presa;
 
 % Compressore
 ptot2=ptot1.*bmat;
-Ttot2_id = Ttot1.*( bmat.^((gamma_a-1)/gamma_a) );
+Ttot2_id = Ttot1.*( bmat.^((g_a-1)/g_a) );
 % Compressore reale:
-eta_c = ( bmat.^( (gamma_a-1)./gamma_a ) - 1 )./( bmat.^( (gamma_a-1)./(gamma_a*ec) ) - 1 );
+eta_c = ( bmat.^( (g_a-1)./g_a ) - 1 )./( bmat.^( (g_a-1)./(g_a*ec) ) - 1 );
 Ttot2 = Ttot1 + (Ttot2_id - Ttot1)./eta_c;
 
 % Diffusore
@@ -63,7 +61,7 @@ Ttot3= (cp_a.*Ttot2 + f .* H_f.*eta_b)./((1+f).*cp_GC);
 Ttot4 = Ttot3 - (1/eta_m).*( cp_a./((1+fmat).*cp_GC) ).* (Ttot2-Ttot1);
 % Turbina ideale
 tau_T= Ttot4./Ttot3;
-pi_t = tau_T.^( gamma_GC./( et.*(gamma_GC-1)) );
+pi_t = tau_T.^( g_GC./( et.*(g_GC-1)) );
 ptot4 = ptot3.*pi_t;
 
 % Post bruciatore (spento)
@@ -71,7 +69,7 @@ ptot_AB = ptot4.*pi_noAB;
 Ttot_AB = Ttot4;
 
 % Ugello
-T_ratio = 1-(p_12000./ptot_AB).^( (gamma_GC-1)./(gamma_GC) );
+T_ratio = 1-(p./ptot_AB).^( (g_GC-1)./(g_GC) );
 ve = sqrt( 2.*cp_GC.*Ttot_AB.*eta_n.*T_ratio );
 m_a=T_subsonic./((1+fmat).*ve-v0_subsonic);
 m_f =fmat.*m_a;
@@ -127,9 +125,6 @@ for i=1:size(TSFC, 1)
     end
 end
 
-minValue = min(min(TSFC));
-[ind11, ind21] = find(TSFC==minValue);
-
 for i=1:size(I_sp_a, 1)
     for j=1:size(I_sp_a, 2)
         if I_sp_a(i, j)<=0 || Ttot3(i, j)>Tmax_turb
@@ -141,7 +136,8 @@ end
 maxValue = max(max(I_sp_a));
 [ind12, ind22] = find(I_sp_a==maxValue);
 
-figure()
+if ismember('plot', varargin)
+    figure()
     t=surf(f, b, I_sp_a');
     view([1, 1, 0.25])
     t.EdgeColor='none';
@@ -174,7 +170,7 @@ figure()
         plot3(X2,y,Z2,'-k');
     end
 
-figure()
+    figure()
     t=surf(f, b, TSFC');
     view([1, 1, 1])
     t.EdgeColor='none';
@@ -182,8 +178,16 @@ figure()
     hold on;
     plot3(f(ind12), b(ind22),TSFC(ind12, ind22),'o', 'Color', 'r', 'MarkerFaceColor','r')
 
-% TSFC diminuisce con beta; per ogni beta ha un ottimo su f
-% I_sp_a ha un ottimo a un certo beta e un certo f
+    % TSFC diminuisce con beta; per ogni beta ha un ottimo su f
+    % I_sp_a ha un ottimo a un certo beta e un certo f
 
     
 end
+
+subCruise.m_a = m_a(ind12, ind22);
+subCruise.f=fmat(ind12, ind22);
+subCruise.b=bmat(ind12, ind22);
+subCruise.I_sp_a=I_sp_a(ind12, ind22);
+subCruise.TSFC=TSFC(ind12, ind22);
+subCruise.M=M_subsonic;
+subCruise.v0=v0_subsonic;
