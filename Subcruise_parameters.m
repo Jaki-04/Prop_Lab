@@ -1,5 +1,6 @@
 %% Studio Parametrico - Regime subsonico
 
+
 function [m_a, f, I_sp_a, TSFC] = Subcruise_parameters()
 
 % Rendimenti e parametri
