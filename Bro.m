@@ -8,7 +8,7 @@ pi_noAB=0.95;       % Fissato
 pi_AB = 0.98;       % Fissato
 pi_b=0.98;          % Fissato
 pi_d = 0.97;        % Fissato
-pi_presa = 0.8;     % Fissato (presa obiettivo)
+pi_presa = 0.7;     % Fissato (presa obiettivo)
 eta_b=0.98;         % Fissato
 eta_AB=0.92;
 eta_n = 0.92;
@@ -54,9 +54,14 @@ m_f =f.*m_a;
 
 % Parametri di merito
 
+
 TSFC=m_f./T_supercruise;
+[TSFC_min, F_min] = min(TSFC);
 figure()
 plot(f, TSFC*3600);
+hold on;
+yline(TSFC_min*3600, '--k');
+plot(f(F_min), TSFC_min*3600, 'o', 'MarkerFaceColor', 'r');
 ylim([0.001, 0.5])
 legend("$TSFC$", "$I_sp}$", "$ve$", 'Interpreter','latex');
 
@@ -256,19 +261,20 @@ M_supercruise = 3.5;        % Mach di ingresso alla presa
 gamma_a =1.4;               % gamma dell'aria
 
 % Angoli del cono e i due angoli di rampa (uguali) su cui ciclare
-cone_angles = deg2rad(5:0.1:20);
-ramp_angles = deg2rad(5:0.1:18);
+cone_angles = deg2rad(5:0.1:25);
+ramp_angles = deg2rad(5:0.1:25);
 
 % Inizializzazione parametri
 p_grid = zeros(length(cone_angles), length(ramp_angles));
 p_tot_ratio_max =0;
 idx=1;
 options = optimoptions('fsolve','Display','none');
+options2 = optimoptions('fminunc','Display','none');
 
 % Funzioni utili
 
     % Funzione angolo di deflessione --> angolo dell'onda
-    alpha_fun = @(M,alpha) atan(2.*cot(alpha).*((M.^2.*sin(alpha).^2)-1)./(M.^2.*(gamma_a+cos(2.*alpha)) + 2));
+    delta_fun = @(M,alpha) atan(2.*cot(alpha).*((M.^2.*sin(alpha).^2)-1)./(M.^2.*(gamma_a+cos(2.*alpha)) + 2));
     
     % Funzione Mach di uscita dall'onda
     M_exit = @(M, alpha, delta) sqrt( (1./sin(alpha-delta).^2) .* (1+M.^2.*sin(alpha).^2.*(gamma_a-1)/2) ./ (gamma_a.*M.^2.*sin(alpha).^2-(gamma_a-1)/2) );
@@ -278,23 +284,32 @@ options = optimoptions('fsolve','Display','none');
 
 
 % Ciclo sugli angoli del cono di ingresso
+
 for delta_cone = cone_angles
 
     % Prima onda obliqua
-    alpha1 = fsolve(@(alpha) alpha_fun(M_supercruise, alpha)-delta_cone, deg2rad(35), options);
+    alpha1 = fsolve(@(alpha) delta_fun(M_supercruise, alpha)-delta_cone, deg2rad(35), options);
     M1=M_exit(M_supercruise, alpha1, delta_cone);
     Mn_supercruise = M_supercruise.*sin(alpha1);
     
     % Seconda onda obliqua
-    alpha2 = fsolve(@(alpha) alpha_fun(M1, alpha)-ramp_angles, deg2rad(45)*ones(size(ramp_angles)), options);
+    alpha2 = fsolve(@(alpha) delta_fun(M1, alpha)-ramp_angles, deg2rad(45)*ones(size(ramp_angles)), options);
     M2=M_exit(M1, alpha2, ramp_angles);
     Mn1 = M1.*sin(alpha2);
-    
+   alpha_max1= fminunc(@(alpha)-delta_fun(M1, alpha), deg2rad(70), options2);
+   delta_max1 = delta_fun(M1, alpha_max1);
+
+
     % Terza onda obliqua
-    alpha3 = fsolve(@(alpha) alpha_fun(M2,alpha)-ramp_angles, deg2rad(55)*ones(size(ramp_angles)), options);
+    alpha3 = fsolve(@(alpha) delta_fun(M2,alpha)-ramp_angles, deg2rad(55)*ones(size(ramp_angles)), options);
     M3=M_exit(M2, alpha3, ramp_angles);
     Mn2 = M2.*sin(alpha3);
-    
+    alpha_max2 = zeros(size(M2));
+    for i = 1:length(M2)
+       [alpha_max2(i)] = fminunc(@(alpha)-delta_fun(M2(i), alpha), deg2rad(90), options2);
+    end
+    delta_max2 = delta_fun(M2, alpha_max2);
+
     % Onda normale
     alpha4 = pi/2;
     M4 = M_exit(M3, alpha4, zeros(size(ramp_angles)));
@@ -305,7 +320,7 @@ for delta_cone = cone_angles
     
     % Troncamento risultati antifisici
     for i=1:length(p_tot_final_ratio)
-        if Mn1(i)<1 || Mn2(i)<1 || Mn3(i)<1
+        if Mn1(i)<1 || Mn2(i)<1 || Mn3(i)<1 || delta_max1<= ramp_angles(i) || delta_max2(i) <= ramp_angles(i)
             p_tot_final_ratio(i) = NaN;
         end
     end
@@ -320,6 +335,10 @@ for delta_cone = cone_angles
         p_tot_ratio_max = currmax;
         ramp_max = ramp_angles(ramp_id);
         cone_max = delta_cone;
+    end
+
+    if delta_cone== deg2rad(18)
+        MS=M2;
     end
 end
 
