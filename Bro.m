@@ -1,4 +1,4 @@
-%% Presa d'aria supersonica
+%% Ottimizzazione della spina supersonica
 
 Air = Air_parameters('25000');
 p=Air.p;
@@ -10,16 +10,25 @@ R = Air.R;
 supCruise = Supercruise_parameters();
 
 M = supCruise.M;        % Mach di ingresso alla presa
-v0 = supCruise.v0;
+v0_sup = supCruise.v0;
+m_a_sup = supCruise.m_a;
 
-% Angoli del cono e i due angoli di rampa (uguali) su cui ciclare
-cone_angles = deg2rad(5:0.1:25);
-ramp_angles = deg2rad(5:0.1:25);
+% Angoli del cono e i due angoli di rampa su cui ciclare
+cone_angles = deg2rad(10:0.1:13);
+ramp_angles1 = deg2rad(12:0.1:16);
+ramp_angles2 = deg2rad(14:0.1:20);
 
 % Inizializzazione parametri
-p_grid = zeros(length(cone_angles), length(ramp_angles));
-p_tot_ratio_max =0;
-idx=1;
+ptot_grid = zeros(length(cone_angles), length(ramp_angles1), length(ramp_angles1));
+pstat_grid = zeros(length(cone_angles), length(ramp_angles1), length(ramp_angles1));
+Mf_grid = zeros(length(cone_angles), length(ramp_angles1), length(ramp_angles1));
+alpha1_grid = zeros(length(cone_angles), length(ramp_angles1), length(ramp_angles1));
+alpha2_grid = zeros(length(cone_angles), length(ramp_angles1), length(ramp_angles1));
+alpha3_grid = zeros(length(cone_angles), length(ramp_angles1), length(ramp_angles1));
+alpha_max2=zeros(size(cone_angles));
+alpha_max3=zeros(size(cone_angles));
+
+
 options = optimoptions('fsolve','Display','none');
 options2 = optimoptions('fminunc','Display','none');
 
@@ -40,134 +49,175 @@ options2 = optimoptions('fminunc','Display','none');
 
 % Ciclo sugli angoli del cono di ingresso
 
-ramp_id_max=1;
-cone_id_max=1;
-cone_id = 1;
 
-for delta_cone = cone_angles
-
-    % Prima onda obliqua
-    alpha1 = fsolve(@(alpha) delta_fun(M, alpha)-delta_cone, deg2rad(35), options);
-    M1=M_exit(M, alpha1, delta_cone);
-    Mn_supercruise = M.*sin(alpha1);
+for ramp1_id = 1:length(ramp_angles1)
     
-    % Seconda onda obliqua
-    alpha2 = fsolve(@(alpha) delta_fun(M1, alpha)-ramp_angles, deg2rad(45)*ones(size(ramp_angles)), options);
-    M2=M_exit(M1, alpha2, ramp_angles);
-    Mn1 = M1.*sin(alpha2);
-   alpha_max1= fminunc(@(alpha)-delta_fun(M1, alpha), deg2rad(70), options2);
-   delta_max1 = delta_fun(M1, alpha_max1);
+    ramp_angle1 = ramp_angles1(ramp1_id);
 
+    for ramp2_id = 1:length(ramp_angles2)
 
-    % Terza onda obliqua
-    alpha3 = fsolve(@(alpha) delta_fun(M2,alpha)-ramp_angles, deg2rad(55)*ones(size(ramp_angles)), options);
-    M3=M_exit(M2, alpha3, ramp_angles);
-    Mn2 = M2.*sin(alpha3);
-    alpha_max2 = zeros(size(M2));
-    for i = 1:length(M2)
-       [alpha_max2(i)] = fminunc(@(alpha)-delta_fun(M2(i), alpha), deg2rad(90), options2);
-    end
-    delta_max2 = delta_fun(M2, alpha_max2);
+        ramp_angle2 = ramp_angles2(ramp2_id);
 
-    % Onda normale
-    alpha4 = pi/2;
-    M4 = M_exit(M3, alpha4, zeros(size(ramp_angles)));
-    Mn3 = M3.*sin(alpha4);
-    
-    % Perdita complessiva 
-    p_tot_final_ratio = p_tot_ratio(Mn_supercruise).*p_tot_ratio(Mn1).*p_tot_ratio(Mn2).*p_tot_ratio(Mn3);
-
-    p_stat_final_ratio = p_stat_ratio(Mn_supercruise).*p_stat_ratio(Mn1).*p_stat_ratio(Mn2).*p_stat_ratio(Mn3);
-    
-    % Troncamento risultati antifisici
-    for i=1:length(p_tot_final_ratio)
-        if Mn1(i)<1 || Mn2(i)<1 || Mn3(i)<1 || delta_max1<= ramp_angles(i) || delta_max2(i) <= ramp_angles(i)
-            p_tot_final_ratio(i) = NaN;
+        % Prima onda obliqua
+        alpha1 = fsolve(@(alpha) delta_fun(M, alpha)-cone_angles, deg2rad(35)*ones(size(cone_angles)), options);
+        M1=M_exit(M, alpha1, cone_angles);
+        Mn_supercruise = M.*sin(alpha1);
+        alpha_max1= fminunc(@(alpha)-delta_fun(M, alpha), deg2rad(70), options2);
+        delta_max1 = delta_fun(M, alpha_max1);
+        
+        % Seconda onda obliqua
+        alpha2 = fsolve(@(alpha) delta_fun(M1, alpha)-ramp_angle1, deg2rad(45)*ones(size(cone_angles)), options);
+        M2=M_exit(M1, alpha2, ramp_angle1);
+        Mn1 = M1.*sin(alpha2);
+        for i = 1:length(cone_angles)
+            alpha_max2(i)= fminunc(@(alpha)-delta_fun(M1(i), alpha), deg2rad(70), options2);
         end
-    end
+        delta_max2 = delta_fun(M1, alpha_max2);
     
-    % Riempio la colonna di p_grid
-    p_grid(idx, :) = p_tot_final_ratio;
-    idx=idx+1;
+        % Terza onda obliqua
+        alpha3 = fsolve(@(alpha) delta_fun(M2,alpha)-ramp_angle2, deg2rad(55)*ones(size(cone_angles)), options);
+        M3=M_exit(M2, alpha3, ramp_angle2);
+        Mn2 = M2.*sin(alpha3);
+        alpha_max2 = zeros(size(M2));
+        for i = 1:length(cone_angles)
+           alpha_max3(i) = fminunc(@(alpha)-delta_fun(M2(i), alpha), deg2rad(90), options2);
+        end
+        delta_max3 = delta_fun(M2, alpha_max3);
     
-    % Ricerca ottimo dell'iterazione corrente
-    [currmax, ramp_id] = max(p_tot_final_ratio);
-    if currmax > p_tot_ratio_max
-        p_tot_ratio_max = currmax;
-        ramp_fin = ramp_angles(ramp_id);
-        cone_fin = delta_cone;
-        ramp_id_max = ramp_id;
-        cone_id_max = cone_id;
-        M1_fin = M1;
-        M2_fin = M2(ramp_id);
-        M3_fin = M3(ramp_id);
-        M4_fin = M4(ramp_id);
-        alpha1_fin = alpha1;
-        alpha2_fin = alpha2(ramp_id);
-        alpha3_fin = alpha3(ramp_id);
-        p_ratio_fin = p_stat_final_ratio(ramp_id);
+        % Onda normale
+        alpha4 = pi/2;
+        M4 = M_exit(M3, alpha4, zeros(size(ramp_angle1)));
+        Mn3 = M3.*sin(alpha4);
+        
+        % Perdita complessiva 
+        p_tot_final_ratio = p_tot_ratio(Mn_supercruise).*p_tot_ratio(Mn1).*p_tot_ratio(Mn2).*p_tot_ratio(Mn3);
+    
+        p_stat_final_ratio = p_stat_ratio(Mn_supercruise).*p_stat_ratio(Mn1).*p_stat_ratio(Mn2).*p_stat_ratio(Mn3);
+        
+        % Troncamento risultati antifisici
+        for i=1:length(p_tot_final_ratio)
+            if Mn1(i)<1 || Mn2(i)<1 || Mn3(i)<1 || delta_max1<= cone_angles(i) || delta_max2(i) <= ramp_angle1 || delta_max3(i) <= ramp_angle2
+                p_tot_final_ratio(i) = NaN;
+            end
+        end
+        
+        % Riempio la colonna di p_grid
+        ptot_grid(:, ramp1_id, ramp2_id) = p_tot_final_ratio;
+        pstat_grid(:, ramp1_id, ramp2_id) = p_stat_final_ratio;
+        Mf_grid(:, ramp1_id, ramp2_id) = M4;
+        alpha1_grid(:, ramp1_id, ramp2_id) = alpha1;
+        alpha2_grid(:, ramp1_id, ramp2_id) = alpha2;
+        alpha3_grid(:, ramp1_id, ramp2_id) = alpha3;
     end
-
-    if delta_cone== deg2rad(18)
-        MS=M2;
-    end
-
-    cone_id=cone_id+1;
 end
 
+[p_tot_ratio_max, linear_idx] = max(ptot_grid(:), [], 'omitnan');
+[id1, id2, id3] = ind2sub(size(ptot_grid), linear_idx);
+
+delta1= cone_angles(id1);
+delta2 = ramp_angles1(id2)+delta1;
+delta3 = ramp_angles2(id3)+delta2;
+
+p_ratio = pstat_grid(id1, id2, id3);
+M_in = Mf_grid(id1, id2, id3);
+a1 = alpha1_grid(id1, id2, id3);
+a2 = alpha2_grid(id1, id2, id3);
+a3 = alpha3_grid(id1, id2, id3);
+
 % Plot della curva del rendimento della presa
-figure()
-    s=surf(rad2deg(cone_angles), rad2deg(ramp_angles), p_grid');
-    s.EdgeColor = 'none';
-    hold on
-    plot3(rad2deg(cone_fin), rad2deg(ramp_fin), p_tot_ratio_max, 'o', 'MarkerFaceColor', 'r')
-    xlabel('Cone Angle')
-    ylabel('Ramp angles')
-    zlabel('$\pi_d$', 'Interpreter','latex')
+% figure()
+%     s=surf(rad2deg(cone_angles), rad2deg(ramp_angle1), ptot_grid');
+%     s.EdgeColor = 'none';
+%     hold on
+%     plot3(rad2deg(cone_fin), rad2deg(ramp_fin), p_tot_ratio_max, 'o', 'MarkerFaceColor', 'r')
+%     xlabel('Cone Angle')
+%     ylabel('Ramp angles')
+%     zlabel('$\pi_d$', 'Interpreter','latex')
 
-sprintf('Rendimento massimo della presa pi_d=%f con valori delta_cone=%f°, delta_ramp=%f° ', p_tot_ratio_max, rad2deg(cone_fin), rad2deg(ramp_fin))
+sprintf('Rendimento massimo della presa pi_d=%f con valori %f° %f° %f°', p_tot_ratio_max, rad2deg(delta1), rad2deg(delta2), rad2deg(delta3))
 
-%% Calcolo dimensioni della presa
+%% Calcolo dimensioni della spina
 
-H= sqrt( supCruise.m_a/ (pi*rho*v0));                   % Raggio della presa
-L_sup = H/tan(cone_fin+alpha1_fin);
-l3 = H/tan(cone_fin+ramp_fin+ramp_fin+alpha3_fin);
-l2 = H/tan(cone_fin+ramp_fin+alpha2_fin) - l3;
-l1 = L_sup-l3-l2;
+% d1 = deg2rad(11.8);
+% d2 = deg2rad(14.4);
+% d3 = deg2rad(17.7);
+% M_in = 0.7191;
+% a1 = 0.4546;
+% a2 = 0.5804;
+% a3 = 0.8035;
+% p_ratio = 39.5125;
 
-T_f = T*(1+M^2*(g-1)/2)/(1+M4_fin^2*(g-1)/2);
-p_f = p*p_ratio_fin;
-rho_f=p_f/(R*T_f);
-v0_f = M4_fin*sqrt(g*R*T_f);
+    % Quantità dopo il diffusore
+    T1 = T*(1+M_supercruise^2*(g-1)/2)/(1+M_in^2*(g-1)/2);
+    p1 = p*p_ratio;
+    rho1=p1/(R*T1);
+    v1 = M_in*sqrt(g*R*T1);
 
-delta_anulo = cone_fin+2*ramp_fin;
-A_anulo= supCruise.m_a/ (rho_f*v0_f);         % Area dell'anulo
-fun = @(l) pi*(H^2*l-H/tan(delta_anulo)*l^2+1/(3*tan(delta_anulo)^2)*l^3)-A_anulo;
-zf = fsolve(fun, 0.4);
-rf = H-zf/(tan(delta_anulo));
-h_anulo=(H-rf)/cos(delta_anulo);        % Dovrebbe venire 0.42286
-h_anulo = 0.42286;
+A_in_sup = m_a_sup/ (pi*rho1*v1);             % Area di ingresso del diffusore supersonico
+ds = 0.01;                                      % Distanza orizzontale dell'urto normale dal bordo superiore
+
+s3 = @(h) h/tan(a3);
+l3 = @(h) s3(h)*cos(delta3);
+h3 = @(h) s3(h)*sin(delta3);
+
+s2 = @(h) ((s3(h)*tan(delta3-delta2) + h)*cos(delta3-delta2))*(1/tan(a2) - 1/tan(a3+delta3-delta2));
+l2 = @(h) s2(h)*cos(delta2);
+h2 = @(h) s2(h)*sin(delta2);
+
+h_temp = @(h) (s3(h)*tan(delta3-delta2) + h)*cos(delta3-delta2);
+s_temp = @(h) h_temp(h)/tan(a3+delta3-delta2);
+s1 = @(h) ((s2(h)+s_temp(h))*tan(delta2-delta1) + h_temp(h))*cos(delta2-delta1)*(1/tan(a1) - 1/tan(a2+delta2-delta1));
+l1 = @(h) s1(h)*cos(delta1);
+h1 = @(h) s1(h)*sin(delta1);
+
+r_shock = @(h) h1(h)+h2(h)+h3(h);
+Rmin_fun = @(hs) r_shock(hs) + ds*sin(delta3)*cos(delta3);
+Rmax_fun = @(hs) r_shock(hs) + hs*cos(delta3);
+Area_fun = @(hs) pi * (hs - ds*sin(delta3)) * (Rmax_fun(hs) + Rmin_fun(hs));
+
+h_shock = fsolve(@(hs)Area_fun(hs)-A_in_sup, 0.4, options);
+h0_d_sup = h_shock -ds*sin(delta3);
+Rmin_in = r_shock(h_shock) + ds*cos(delta3)*sin(delta3);
+Rmax_in = Rmin_in + h0_d_sup*cos(delta3);
+L_sup = Rmax_in/tan(a1+delta1)+ds;
+
+% Diffusore subsonico dopo l'onda normale
+    M2 = 0.3;                          % Mach target all'ingresso del postbruciatore
+    T2 = T*(1+M_supercruise^2*(g-1)/2)/(1+M2^2*(g-1)/2);
+    v2 = M2*sqrt(R*g*T2);
+    p2_id = p1*(T2/T1)^(g/(g-1));
+    rho2 = p2_id/(R*T2);
+    Area_ratio_sub = rho1*v1/(rho2*v2);
+    A2 = Area_ratio_sub*A_in_sup; 
 
 %% Presa subsonica
 
-h_anulo = 0.42286;
 Air = Air_parameters('12000');
-p=Air.p;
-T=Air.T;
-rho=Air.rho;
+p_sub=Air.p;
+T_sub=Air.T;
+rho_sub=Air.rho;
 g = Air.g; 
 R = Air.R;
 
 subCruise = Subcruise_parameters();
-M = subCruise.M;
-v0 = subCruise.v0;
-m_a = subCruise.m_a;
+M_sub = subCruise.M;
+v0_sub = subCruise.v0;
+m_a_sub = subCruise.m_a;
+
+Ttot0_sub = T_sub*(1+M_sub^2*(g-1)/2);
+ptot0_sub = p_sub*(1+M_sub^2*(g-1)/2)^(g/(g-1));
 
 % Sezione di ingresso subsonica
-A_anulo_sub = m_a/(rho*v0);
-R_top = sqrt(H^2-A_anulo_sub/pi);     % Raggio necessario alla sommità della spina per avere l'area richiesta
-h0_duct = H-R_top;     % Altezza iniziale della strozzatura di ingresso in subsonico
-fun = @(l) pi*(H^2*l-H/tan(delta_anulo)*l^2+1/(3*tan(delta_anulo)^2)*l^3)-A_anulo_sub;
-zf = fsolve(fun, 0.4);
-rf = H-zf/(tan(delta_anulo));
-h_anulo=(H-rf)/cos(delta_anulo); 
+A_in_sub = m_a_sub/(rho_sub*v0_sub);
+
+% Diffusore subsonico
+M2_sub = 0.3;                          % Mach target all'ingresso del compressore
+T2_sub = Ttot0_sub/(1+M2_sub^2*(g-1)/2);
+v2_sub = M2_sub*sqrt(R*g*T2_sub);
+p2_sub_id = p_sub*(T2_sub/T_sub)^(g/(g-1));
+
+rho2_sub = p2_sub_id/(R*T2_sub);
+Area_ratio_sub = rho_sub*v0_sub/(rho2_sub*v2_sub);
+A_c = Area_ratio_sub*A_in_sub;               % Area di ingresso al compressore
+
+
