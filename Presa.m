@@ -148,7 +148,7 @@ sprintf('Rendimento massimo della presa pi_d=%f con valori %f° %f° %f°', p_to
 % p_ratio = 39.5125;
 
     % Quantità dopo il diffusore
-    T1 = T*(1+M_supercruise^2*(g-1)/2)/(1+M_in^2*(g-1)/2);
+    T1 = T*(1+M^2*(g-1)/2)/(1+M_in^2*(g-1)/2);
     p1 = p*p_ratio;
     rho1=p1/(R*T1);
     v1 = M_in*sqrt(g*R*T1);
@@ -183,7 +183,7 @@ L_sup = Rmax_in/tan(a1+delta1)+ds;
 
 % Diffusore subsonico dopo l'onda normale
     M2 = 0.3;                          % Mach target all'ingresso del postbruciatore
-    T2 = T*(1+M_supercruise^2*(g-1)/2)/(1+M2^2*(g-1)/2);
+    T2 = T*(1+M^2*(g-1)/2)/(1+M2^2*(g-1)/2);
     v2 = M2*sqrt(R*g*T2);
     p2_id = p1*(T2/T1)^(g/(g-1));
     rho2 = p2_id/(R*T2);
@@ -220,4 +220,36 @@ rho2_sub = p2_sub_id/(R*T2_sub);
 Area_ratio_sub = rho_sub*v0_sub/(rho2_sub*v2_sub);
 A_c = Area_ratio_sub*A_in_sub;               % Area di ingresso al compressore
 
+% diocan
+
+eta_p =0.95; %parametro provvisorio
+C_z1 = v2_sub;                                                          %velocità assiale nella sezione di ingresso (si conserva)
+pi_diff = ((eta_p*(T2_sub - T)+T)/T)^((g-1)/g);           %rapporto di compressione ottenuto nel diffusore
+p_tIn = pi_diff * p * (1+(g-1)/2 * M);                           %pressione totale in ingresso al compressore
+rho_in = p_tIn/(R*T2_sub);
+A_in_comp = m_a_sub/(rho_in * C_z1);                                %area di ingresso nel compressore
+
+eta_poli=0.95;
+beta = subCruise.b;
+p_tOut = beta * p_tIn;
+T_tOut = beta^((g-1)/(eta_poli*g)) * T2_sub;                          %temperatura totale in uscita con rendimento politropico
+T_sOut = T_tOut/(1 + (g - 1)/2 * C_z1^2 /(g * R * T_tOut));         %temperatura statica in uscita
+M_Out = C_z1 / sqrt(g * R * T_sOut);                                %mach in uscita
+p_sOut = p_tOut/(1 + (g-1)/2 * M_Out^2)^(g/(g-1));                  %pressione statica dell'aria in uscita
+rho_Out = p_sOut/(R * T2_sub);                                        %rho dell'aria in uscita
+A_Out_comp = m_a_sub/(rho_Out * C_z1);                                     %area di uscita del compressore
+
+%dimensionamento primo stadio r_h1/r_t1 = 0.5
+r_t = sqrt((2*A_in_comp)/pi);
+r_h1 = r_t/2;
+r_he = sqrt((A_Out_comp)/pi);
+U_tip = 400;
+omega = U_tip/r_t;
+
+U_pala = @(r) omega * r;                                                %r può variare solo tra r_h e r_t
+W = @(U_pala) sqrt(U_pala.^2 + (C_z1 .* ones(size(U_pala))).^2);
+Re_corda = @(chord, W) (rho_in * chord .* W) / 10^(-3);        %fcn handle più generica per il reynolds sulla pala
+%disp(Re_corda(0.2, U_pala(r_h1:0.01:r_t)));
+disp(omega/(2*pi) * 60);
+disp(U_tip/sqrt(g*R*T2_sub))
 
