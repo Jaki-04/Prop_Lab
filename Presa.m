@@ -183,17 +183,17 @@ R_in = Rmax_fun(Hin_sup);
 L_sup = (R_in-ds*sin(delta3))/tan(a1+delta1)+ds*cos(delta3);
 
 % Diffusore subsonico dopo l'onda normale
-    M2 = 0.5;                          % Mach target all'ingresso del postbruciatore
-    eta_diff = 0.97;
-    pi_presa = ((1+eta_diff*M2^2*(g-1)/2)/(1+M2^2*(g-1)/2))^(g/(g-1));
+M2 = 0.25;                                  % Mach target all'ingresso del postbruciatore
+eta_diff = 0.97;
+pi_presa = ((1+eta_diff*M_in^2*(g-1)/2)/(1+M_in^2*(g-1)/2))^(g/(g-1));    % Perdita di pressione totale
 
-    T2 = Ttot1/(1+M2^2*(g-1)/2);
-    v2 = M2*sqrt(R*g*T2);
-    p2 = ptot1*pi_presa/((1+M2^2*(g-1)/2)^(g/(g-1)));
-    rho2 = p2/(R*T2);
+T2 = Ttot1/(1+M2^2*(g-1)/2);
+v2 = M2*sqrt(R*g*T2);
+p2 = ptot1*pi_presa/((1+M2^2*(g-1)/2)^(g/(g-1)));
+rho2 = p2/(R*T2);
 
-    Area_ratio_sup = rho1*v1/(rho2*v2);
-    A2 = Area_ratio_sup*Ain_sup; 
+Area_ratio_sup = rho1*v1/(rho2*v2);
+A2 = Area_ratio_sup*Ain_sup; 
 
 %% Presa subsonica
 
@@ -216,20 +216,20 @@ ptot1_sub = p_sub*(1+M_sub^2*(g-1)/2)^(g/(g-1));
 Ain_sub = m_a_sub/(rho_sub*v0_sub);
 
 % Diffusore subsonico
-eta_presa = 0.97;               
-M2_sub = 0.3;               % Mach target all'ingresso del compressore
+eta_diff_sub = 0.97;               
+M2_sub = 0.5;               % Mach target all'ingresso del compressore
 
-pi_presa_sub = ((1+eta_presa*M2_sub^2*(g-1)/2)/(1+M2_sub^2*(g-1)/2))^(g/(g-1));
+pi_presa_sub = ((1+eta_diff_sub*M_sub^2*(g-1)/2)/(1+M_sub^2*(g-1)/2))^(g/(g-1));
 T2_sub = Ttot1_sub/(1+M2_sub^2*(g-1)/2);
 v2_sub = M2_sub*sqrt(R*g*T2_sub);
 p2_sub = ptot1_sub*pi_presa_sub/((1+M2_sub^2*(g-1)/2)^(g/(g-1)));
 
 rho2_sub = p2_sub/(R*T2_sub);
 Area_ratio_sub = rho_sub*v0_sub/(rho2_sub*v2_sub);
-A_c = Area_ratio_sub*Ain_sub;               % Area di ingresso al compressore
+A2_sub = Area_ratio_sub*Ain_sub;               % Area di ingresso al compressore
 
-l2f = l2(h_shock);
-l3f = l3(h_shock);
-delta = @(x) delta3*(x<=(l3f+ds*cos(delta3)^2)) + delta2*(x>(l3f+ds*cos(delta3)^2))*(x<=(l2f+l3f+ds*cos(delta3)^2)) + delta1*(x>(l2f+l3f+ds*cos(delta3)^2));
-Ain_sub_fun = @(x) pi*(R_in+r_in-x*cos( delta(x) )*sin( delta(x) ))*(Hin_sup+x*sin( delta(x) ));
-dx_sub = fsolve(@(x) Ain_sub_fun(x)-Ain_sub, 0.1, options);
+% l2f = l2(h_shock);
+% l3f = l3(h_shock);
+% delta = @(x) delta3*(x<=(l3f+ds*cos(delta3)^2)) + delta2*(x>(l3f+ds*cos(delta3)^2))*(x<=(l2f+l3f+ds*cos(delta3)^2)) + delta1*(x>(l2f+l3f+ds*cos(delta3)^2));
+% Ain_sub_fun = @(x) pi*(R_in+r_in-x*cos( delta(x) )*sin( delta(x) ))*(Hin_sup+x*sin( delta(x) ));
+% dx_sub = fsolve(@(x) Ain_sub_fun(x)-Ain_sub, 0.1, options);
