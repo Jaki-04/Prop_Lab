@@ -17,7 +17,7 @@ rho_In = p_In/(R*T_In);
 C_z1 = 93.85278;                                                % Velocità assiale (costante)
 A_in_comp = m_a/(rho_In * C_z1);                                %area di ingresso nel compressore
 
-eta_poli=0.95;
+eta_poli=0.9;
 beta = subCruise.b;
 p_tOut = beta * p_tIn;
 T_tOut = beta^((g-1)/(eta_poli*g)) * T_tIn;                          %temperatura totale in uscita con rendimento politropico
@@ -35,7 +35,7 @@ r_he = sqrt(r_t^2-(A_Out_comp)/pi);
 U_tip = 400;
 omega = U_tip/r_t;
 
-U_pala = @(r) omega * r;                                                %r può variare solo tra r_h e r_t
+U_pala = @(r) (omega * r);                                                %r può variare solo tra r_h e r_t
 W = @(U_pala) sqrt(U_pala.^2 + (C_z1 .* ones(size(U_pala))).^2);
 Re_corda = @(chord, W) (rho_in * chord .* W) / 10^(-3);        %fcn handle più generica per il reynolds sulla pala
 %disp(Re_corda(0.2, U_pala(r_h1:0.01:r_t)));
