@@ -156,7 +156,7 @@ sprintf('Rendimento massimo della presa pi_d=%f con valori %f° %f° %f°', p_to
     v1 = M_in*sqrt(g*R*T1);
 
 Ain_sup = m_a_sup/ (rho1*v1);             % Area di ingresso del diffusore supersonico
-ds = 0.01;                                      % Distanza orizzontale dell'urto normale dal bordo superiore
+ds = 0.01;                                % Distanza (parallela alla rampa 3) dell'urto normale dal bordo superiore
 
 s3 = @(h) h/tan(a3);
 l3 = @(h) s3(h)*cos(delta3);
@@ -173,15 +173,14 @@ l1 = @(h) s1(h)*cos(delta1);
 h1 = @(h) s1(h)*sin(delta1);
 
 r_shock = @(h) h1(h)+h2(h)+h3(h);
-Rmin_fun = @(hs) r_shock(hs) + ds*sin(delta3)*cos(delta3);
-Rmax_fun = @(hs) r_shock(hs) + hs*cos(delta3);
-Area_fun = @(hs) pi * (hs - ds*sin(delta3)) * (Rmax_fun(hs) + Rmin_fun(hs));
+Rmin_fun = @(h) r_shock(h) + ds*sin(delta3);
+Rmax_fun = @(h) r_shock(h) + h*cos(delta3) +ds*sin(delta3);
+Area_fun = @(h) pi * h * (Rmax_fun(h) + Rmin_fun(h));
 
-h_shock = fsolve(@(hs)Area_fun(hs)-Ain_sup, 0.4, options);
-h0_d_sup = h_shock -ds*sin(delta3);
-r_in = r_shock(h_shock) + ds*cos(delta3)*sin(delta3);
-R_in = r_in + h0_d_sup*cos(delta3);
-L_sup = R_in/tan(a1+delta1)+ds;
+Hin_sup = fsolve(@(h)Area_fun(h)-Ain_sup, 0.4, options);
+r_in = Rmin_fun(Hin_sup);
+R_in = Rmax_fun(Hin_sup);
+L_sup = (R_in-ds*sin(delta3))/tan(a1+delta1)+ds*cos(delta3);
 
 % Diffusore subsonico dopo l'onda normale
     M2 = 0.5;                          % Mach target all'ingresso del postbruciatore
@@ -232,5 +231,5 @@ A_c = Area_ratio_sub*Ain_sub;               % Area di ingresso al compressore
 l2f = l2(h_shock);
 l3f = l3(h_shock);
 delta = @(x) delta3*(x<=(l3f+ds*cos(delta3)^2)) + delta2*(x>(l3f+ds*cos(delta3)^2))*(x<=(l2f+l3f+ds*cos(delta3)^2)) + delta1*(x>(l2f+l3f+ds*cos(delta3)^2));
-Ain_sub_fun = @(x) pi*(R_in+r_in-x*cos( delta(x) )*sin( delta(x) ))*(h0_d_sup+x*sin( delta(x) ));
+Ain_sub_fun = @(x) pi*(R_in+r_in-x*cos( delta(x) )*sin( delta(x) ))*(Hin_sup+x*sin( delta(x) ));
 dx_sub = fsolve(@(x) Ain_sub_fun(x)-Ain_sub, 0.1, options);
