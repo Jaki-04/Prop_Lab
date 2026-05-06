@@ -1,0 +1,19 @@
+function Parameters = Geometry()
+    Parameters.delta1 = deg2rad(11.8);
+    Parameters.delta2 = deg2rad(14.4+11.8);
+    Parameters.delta3 = deg2rad(17.7+14.4+11.8);
+    Parameters.l1 = 0.436836070005140;          % Prima rampa
+    Parameters.l2 = 0.270084851214007;          % Seconda rampa
+    Parameters.l3_shock = 0.162738884596995;    % Terza rampa (fino all'urto normale)
+    Parameters.l3 = 0.167930823642433;          % Terza rampa (fino alla sezione di ingresso supersonica)
+    Parameters.ds = 0.01;
+    Parameters.Ain_sup = 0.667777653078562;
+    Parameters.Hin_sup = 0.227268682978265;
+    Parameters.rin = 0.385761474808971;
+    Parameters.Rin = 0.549520176979085;
+    Parameters.A1_sup = 0.831707883262311;
+    Parameters.L_sup = 0.717263224574615;           % Dalla punta del cono al punto focale
+    Parameters.Ain_sub = 0;         % Sbagliati
+    Parameters.Hin_sub = 0;         % Sbagliati
+    Parameters.A1_sub = 0;          % Sbagliati
+end

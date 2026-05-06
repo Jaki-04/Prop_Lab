@@ -14,9 +14,9 @@ v0_sup = supCruise.v0;
 m_a_sup = supCruise.m_a;
 
 % Angoli del cono e i due angoli di rampa su cui ciclare
-cone_angles = deg2rad(10:0.1:13);
-ramp_angles1 = deg2rad(12:0.1:16);
-ramp_angles2 = deg2rad(14:0.1:20);
+cone_angles = deg2rad(11:0.1:12);
+ramp_angles1 = deg2rad(14:0.1:15);
+ramp_angles2 = deg2rad(17:0.1:18);
 
 % Inizializzazione parametri
 ptot_grid = zeros(length(cone_angles), length(ramp_angles1), length(ramp_angles1));
@@ -147,13 +147,15 @@ sprintf('Rendimento massimo della presa pi_d=%f con valori %f° %f° %f°', p_to
 % a3 = 0.8035;
 % p_ratio = 39.5125;
 
-    % Quantità dopo il diffusore
+    % Quantità dopo l'onda normale
     T1 = T*(1+M^2*(g-1)/2)/(1+M_in^2*(g-1)/2);
     p1 = p*p_ratio;
+    Ttot1 = T*(1+M^2*(g-1)/2);
+    ptot1 = p_tot_ratio_max*p*(1+M^2*(g-1)/2)^(g/(g-1));
     rho1=p1/(R*T1);
     v1 = M_in*sqrt(g*R*T1);
 
-A_in_sup = m_a_sup/ (pi*rho1*v1);             % Area di ingresso del diffusore supersonico
+Ain_sup = m_a_sup/ (rho1*v1);             % Area di ingresso del diffusore supersonico
 ds = 0.01;                                      % Distanza orizzontale dell'urto normale dal bordo superiore
 
 s3 = @(h) h/tan(a3);
@@ -175,20 +177,24 @@ Rmin_fun = @(hs) r_shock(hs) + ds*sin(delta3)*cos(delta3);
 Rmax_fun = @(hs) r_shock(hs) + hs*cos(delta3);
 Area_fun = @(hs) pi * (hs - ds*sin(delta3)) * (Rmax_fun(hs) + Rmin_fun(hs));
 
-h_shock = fsolve(@(hs)Area_fun(hs)-A_in_sup, 0.4, options);
+h_shock = fsolve(@(hs)Area_fun(hs)-Ain_sup, 0.4, options);
 h0_d_sup = h_shock -ds*sin(delta3);
-Rmin_in = r_shock(h_shock) + ds*cos(delta3)*sin(delta3);
-Rmax_in = Rmin_in + h0_d_sup*cos(delta3);
-L_sup = Rmax_in/tan(a1+delta1)+ds;
+r_in = r_shock(h_shock) + ds*cos(delta3)*sin(delta3);
+R_in = r_in + h0_d_sup*cos(delta3);
+L_sup = R_in/tan(a1+delta1)+ds;
 
 % Diffusore subsonico dopo l'onda normale
-    M2 = 0.3;                          % Mach target all'ingresso del postbruciatore
-    T2 = T*(1+M^2*(g-1)/2)/(1+M2^2*(g-1)/2);
+    M2 = 0.5;                          % Mach target all'ingresso del postbruciatore
+    eta_diff = 0.97;
+    pi_presa = ((1+eta_diff*M2^2*(g-1)/2)/(1+M2^2*(g-1)/2))^(g/(g-1));
+
+    T2 = Ttot1/(1+M2^2*(g-1)/2);
     v2 = M2*sqrt(R*g*T2);
-    p2_id = p1*(T2/T1)^(g/(g-1));
-    rho2 = p2_id/(R*T2);
-    Area_ratio_sub = rho1*v1/(rho2*v2);
-    A2 = Area_ratio_sub*A_in_sup; 
+    p2 = ptot1*pi_presa/((1+M2^2*(g-1)/2)^(g/(g-1)));
+    rho2 = p2/(R*T2);
+
+    Area_ratio_sup = rho1*v1/(rho2*v2);
+    A2 = Area_ratio_sup*Ain_sup; 
 
 %% Presa subsonica
 
@@ -204,52 +210,27 @@ M_sub = subCruise.M;
 v0_sub = subCruise.v0;
 m_a_sub = subCruise.m_a;
 
-Ttot0_sub = T_sub*(1+M_sub^2*(g-1)/2);
-ptot0_sub = p_sub*(1+M_sub^2*(g-1)/2)^(g/(g-1));
+Ttot1_sub = T_sub*(1+M_sub^2*(g-1)/2);
+ptot1_sub = p_sub*(1+M_sub^2*(g-1)/2)^(g/(g-1));
 
 % Sezione di ingresso subsonica
-A_in_sub = m_a_sub/(rho_sub*v0_sub);
+Ain_sub = m_a_sub/(rho_sub*v0_sub);
 
 % Diffusore subsonico
-M2_sub = 0.3;                          % Mach target all'ingresso del compressore
-T2_sub = Ttot0_sub/(1+M2_sub^2*(g-1)/2);
+eta_presa = 0.97;               
+M2_sub = 0.3;               % Mach target all'ingresso del compressore
+
+pi_presa_sub = ((1+eta_presa*M2_sub^2*(g-1)/2)/(1+M2_sub^2*(g-1)/2))^(g/(g-1));
+T2_sub = Ttot1_sub/(1+M2_sub^2*(g-1)/2);
 v2_sub = M2_sub*sqrt(R*g*T2_sub);
-p2_sub_id = p_sub*(T2_sub/T_sub)^(g/(g-1));
+p2_sub = ptot1_sub*pi_presa_sub/((1+M2_sub^2*(g-1)/2)^(g/(g-1)));
 
-rho2_sub = p2_sub_id/(R*T2_sub);
+rho2_sub = p2_sub/(R*T2_sub);
 Area_ratio_sub = rho_sub*v0_sub/(rho2_sub*v2_sub);
-A_c = Area_ratio_sub*A_in_sub;               % Area di ingresso al compressore
+A_c = Area_ratio_sub*Ain_sub;               % Area di ingresso al compressore
 
-% diocan
-
-eta_p =0.95; %parametro provvisorio
-C_z1 = v2_sub;                                                          %velocità assiale nella sezione di ingresso (si conserva)
-pi_diff = ((eta_p*(T2_sub - T)+T)/T)^((g-1)/g);           %rapporto di compressione ottenuto nel diffusore
-p_tIn = pi_diff * p * (1+(g-1)/2 * M);                           %pressione totale in ingresso al compressore
-rho_in = p_tIn/(R*T2_sub);
-A_in_comp = m_a_sub/(rho_in * C_z1);                                %area di ingresso nel compressore
-
-eta_poli=0.95;
-beta = subCruise.b;
-p_tOut = beta * p_tIn;
-T_tOut = beta^((g-1)/(eta_poli*g)) * T2_sub;                          %temperatura totale in uscita con rendimento politropico
-T_sOut = T_tOut/(1 + (g - 1)/2 * C_z1^2 /(g * R * T_tOut));         %temperatura statica in uscita
-M_Out = C_z1 / sqrt(g * R * T_sOut);                                %mach in uscita
-p_sOut = p_tOut/(1 + (g-1)/2 * M_Out^2)^(g/(g-1));                  %pressione statica dell'aria in uscita
-rho_Out = p_sOut/(R * T2_sub);                                        %rho dell'aria in uscita
-A_Out_comp = m_a_sub/(rho_Out * C_z1);                                     %area di uscita del compressore
-
-%dimensionamento primo stadio r_h1/r_t1 = 0.5
-r_t = sqrt((2*A_in_comp)/pi);
-r_h1 = r_t/2;
-r_he = sqrt((A_Out_comp)/pi);
-U_tip = 400;
-omega = U_tip/r_t;
-
-U_pala = @(r) omega * r;                                                %r può variare solo tra r_h e r_t
-W = @(U_pala) sqrt(U_pala.^2 + (C_z1 .* ones(size(U_pala))).^2);
-Re_corda = @(chord, W) (rho_in * chord .* W) / 10^(-3);        %fcn handle più generica per il reynolds sulla pala
-%disp(Re_corda(0.2, U_pala(r_h1:0.01:r_t)));
-disp(omega/(2*pi) * 60);
-disp(U_tip/sqrt(g*R*T2_sub))
-
+l2f = l2(h_shock);
+l3f = l3(h_shock);
+delta = @(x) delta3*(x<=(l3f+ds*cos(delta3)^2)) + delta2*(x>(l3f+ds*cos(delta3)^2))*(x<=(l2f+l3f+ds*cos(delta3)^2)) + delta1*(x>(l2f+l3f+ds*cos(delta3)^2));
+Ain_sub_fun = @(x) pi*(R_in+r_in-x*cos( delta(x) )*sin( delta(x) ))*(h0_d_sup+x*sin( delta(x) ));
+dx_sub = fsolve(@(x) Ain_sub_fun(x)-Ain_sub, 0.1, options);
