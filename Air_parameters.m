@@ -1,6 +1,6 @@
 function Air = Air_parameters(varargin)
  
-Air.cp=1000;
+Air.cp=1004;
 Air.g=1.4;
 Air.R=287.01;
 
