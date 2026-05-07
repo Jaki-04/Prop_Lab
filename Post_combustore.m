@@ -12,7 +12,7 @@ f = supCruise.f;
 % da presa.m da sistemare con mach 0,25
 Ttot1 = 747.4425;
 v2 = 267.4095;
-A2 = 0.8317; % da sistemare perchè dovrebbe esserci pi_AB = 0.95 se acceso
+A2 = 1.514674633685526; % da sistemare perchè dovrebbe esserci pi_AB = 0.95 se acceso
 r_t5 = 0.45; %numero a caso da calcolare poi
 L_H_ratio = 3.2; %arbitrario
 B = 0.28; %arbitrario

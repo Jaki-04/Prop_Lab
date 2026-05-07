@@ -127,4 +127,5 @@ N_stadiHP = Ltot_HP/L_HP;
 b_stadio_HP = beta2^(1/N_stadiHP);
 N_stadiHP = ceil(N_stadiHP);
 beta2_real = b_stadio_HP^N_stadiHP;
+
 beta = beta1_real*beta2_real;

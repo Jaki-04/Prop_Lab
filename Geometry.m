@@ -12,8 +12,8 @@ function Parameters = Geometry()
     Parameters.Hin_sup = 0.229589275998660;         % Altezza all'ingresso
     Parameters.rin = 0.380198703067846;             % Raggio minimo all'ingresso
     Parameters.Rin = 0.545629511118563;             % Raggio massimo all'ingresso
-    Parameters.A1_sup = 0.831707883262311;          % Area dopo la diffusione subsonica
-    Parameters.Ain_sub = 0;         % Sbagliati
-    Parameters.Hin_sub = 0;         % Sbagliati
-    Parameters.A1_sub = 0;          % Sbagliati
+    Parameters.A1_sup =  1.514674633685526;          % Area dopo la diffusione subsonica
+    Parameters.Ain_sub = 0.452820254995432;         % Sbagliati
+    Parameters.Hin_sub = 0.152624354077758;         % Sbagliati
+    Parameters.A1_sub = 0.602370359775345;          % Sbagliati
 end
