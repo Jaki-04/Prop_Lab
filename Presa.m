@@ -133,7 +133,7 @@ a3 = alpha3_grid(id1, id2, id3);
 %     ylabel('Ramp angles')
 %     zlabel('$\pi_d$', 'Interpreter','latex')
 
-sprintf('Rendimento massimo della presa pi_d=%f con valori %f° %f° %f°', p_tot_ratio_max, rad2deg(delta1), rad2deg(delta2), rad2deg(delta3))
+% sprintf('Rendimento massimo della presa pi_d=%f con valori %f° %f° %f°', p_tot_ratio_max, rad2deg(delta1), rad2deg(delta2), rad2deg(delta3))
 
 %% Calcolo dimensioni della spina
 
@@ -214,8 +214,9 @@ rmax_spina = sqrt(R_in^2-Ain_sub/pi);
 h0_d_sub = R_in-rmax_spina;
 phi_inf = deg2rad(10); 
 
-rt_c = 0.506560138592840;           % Dati dal compressore
-rh_c = 0.253280069296420;           % Dati dal compressore
+G = Geometry();
+rt_c = G.Rc_t;           % Dati dal compressore
+rh_c = G.Rc_h;           % Dati dal compressore
 
 deltar_inf = rmax_spina-rh_c;
 deltar_sup = rt_c-R_in;

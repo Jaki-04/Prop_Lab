@@ -19,4 +19,7 @@ function Parameters = Geometry()
     Parameters.Ain_sub = 0.452820254995432;         % Area di ingresso in subsonico
     Parameters.Hin_sub = 0.152624354077758;         % Altezza all'ingresso in subsonico
     Parameters.A1_sub = 0.602370359775345;          % Area dopo la diffusione
+
+    Parameters.Rc_h = 0.253280069296420;        % Raggio hub del compressore
+    Parameters.Rc_t = 0.506560138592840;        % Raggio tip del compressore
 end
