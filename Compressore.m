@@ -4,44 +4,47 @@ Air = Air_parameters();
 R = Air.R;
 g = Air.g;
 cp = Air.cp;
-
+options = optimoptions('fsolve','Display','none');
 S = Subcruise_parameters();
 m_a = S.m_a;
 
+[pf, Tf, rhof, Mf, Af] = Presa('sub');
 % Valori di ingresso
-    Min = 0.5;              
-    p_tIn = 3.049306402121894e+04;
-    p_In = p_tIn/(1 + (g-1)/2 * Min^2)^(g/(g-1));
-    T_tIn = 247.955925;
-    T_In = T_tIn/(1 + (g-1)/2 * Min^2);
-    rho_In = p_In/(R*T_In);
+    Min = Mf;              
+    p_In = pf;
+    p_tIn = p_In*(1 + (g-1)/2 * Min^2)^(g/(g-1));
+    T_In = Tf;
+    T_tIn = T_In*(1 + (g-1)/2 * Min^2);
+    rho_In = rhof;
 
 C_z1 = Min*sqrt(g*R*T_In);                              % Velocità assiale (costante)
-A_in_comp = m_a/(rho_In * C_z1);                        % Area di ingresso nel compressore
+A_in_comp = Af;                                         % Area di ingresso nel compressore
 
 eta_poli=0.9;                                           % Rendimento politropico del compressore (costante)
 beta = S.b;                                             % Rapporto di compressione (noto)
-lpbeta = 4;
+
+% Ripartizione della compressione tra LP e HP
+lpbeta = 7;
 beta1 = lpbeta;
 beta2 = beta/lpbeta;
 
-p_tmed = beta1 * p_tIn;                                  % Pressione totale in uscita
-T_tmed = beta1^((g-1)/(eta_poli*g)) * T_tIn;             % Temperatura totale in uscita con rendimento politropico
+% LP
+p_tmed = beta1 * p_tIn;                                 % Pressione totale in uscita
+T_tmed = beta1^((g-1)/(eta_poli*g)) * T_tIn;            % Temperatura totale in uscita con rendimento politropico
 T_med = T_tmed - (g-1)/(2*g*R)*C_z1^2;                  % Temperatura statica in uscita
 M_med = C_z1 / sqrt(g * R * T_med);                     % Mach in uscita
 p_med = p_tmed/(1 + (g-1)/2 * M_med^2)^(g/(g-1));       % Pressione statica dell'aria in uscita
 rho_med = p_med/(R * T_med);                            % Rho dell'aria in uscita
-A_med_comp = m_a/(rho_med * C_z1);                      % Area di uscita del compressore
+A_med_comp = m_a/(rho_med * C_z1);                      % Area di uscita del compressore LP
 
-
-
-p_tOut = beta2 * p_tmed;                                  % Pressione totale in uscita
-T_tOut = beta2^((g-1)/(eta_poli*g)) * T_tmed;             % Temperatura totale in uscita con rendimento politropico
+% HP
+p_tOut = beta2 * p_tmed;                                % Pressione totale in uscita
+T_tOut = beta2^((g-1)/(eta_poli*g)) * T_tmed;           % Temperatura totale in uscita con rendimento politropico
 T_Out = T_tOut - (g-1)/(2*g*R)*C_z1^2;                  % Temperatura statica in uscita
 M_Out = C_z1 / sqrt(g * R * T_Out);                     % Mach in uscita
 p_Out = p_tOut/(1 + (g-1)/2 * M_Out^2)^(g/(g-1));       % Pressione statica dell'aria in uscita
 rho_Out = p_Out/(R * T_Out);                            % Rho dell'aria in uscita
-A_Out_comp = m_a/(rho_Out * C_z1);                      % Area di uscita del compressore
+A_Out_comp = m_a/(rho_Out * C_z1);                      % Area di uscita del compressore HP
 
 % Dimensionamento con primo stadio r_h1/r_t1 = 0.5
 a=0.5;
@@ -55,8 +58,8 @@ r_pitch2 = (r_t+r_HP)/2;
 % Omega necessarie ad avere Mrel=1 sulla pitchline
 U_pitch = @(omega, r_pitch) omega*r_pitch;
 Mrel = @(omega, r_pitch, T) sqrt(C_z1^2+U_pitch(omega, r_pitch)^2)/sqrt(g*R*T);
-omega1 = fsolve(@(omega) Mrel(omega, r_pitch1, T_In)-1, 7000);
-omega2 = fsolve(@(omega) Mrel(omega, r_pitch2, T_med)-1, 7000);
+omega1 = fsolve(@(omega) Mrel(omega, r_pitch1, T_In)-1, 7000, options);
+omega2 = fsolve(@(omega) Mrel(omega, r_pitch2, T_med)-1, 7000, options);
 
 
 U_pitch1 = omega1*r_pitch1;
@@ -119,13 +122,13 @@ Ltot_LP = cp*(T_med-T_In);
 N_stadiLP = Ltot_LP/L_LP;
 b_stadio_LP = beta1^(1/N_stadiLP);
 N_stadiLP = ceil(N_stadiLP);
-beta1_real = b_stadio_LP^N_stadiLP;
+beta1_real = b_stadio_LP^(ceil(N_stadiLP)-1);
 
 L_HP = U_pitch2*(Cteta2_HP);
 Ltot_HP = cp*(T_Out-T_med);
 N_stadiHP = Ltot_HP/L_HP;
 b_stadio_HP = beta2^(1/N_stadiHP);
 N_stadiHP = ceil(N_stadiHP);
-beta2_real = b_stadio_HP^N_stadiHP;
+beta2_real = b_stadio_HP^ceil(N_stadiHP);
 
-beta = beta1_real*beta2_real;
+beta_real = beta1_real*beta2_real;

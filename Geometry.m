@@ -7,13 +7,16 @@ function Parameters = Geometry()
     Parameters.l3_shock = 0.159533184247144;    % Terza rampa (fino all'urto normale)
     Parameters.l3 = 0.166738695363947;          % Terza rampa (fino alla sezione di ingresso supersonica)
     Parameters.L_sup = 0.700536761338328;       % Distanza orizzontale dalla punta del cono al cowl lip
+    Parameters.L_sub = 0.914613896582030;       % Distanza orizzontale tra il cowl lip e il compressore
     Parameters.ds = 0.01;                       % Distanza tra l'onda normale e la sezione di ingresso (parallela a rampa 3)
+
     Parameters.Ain_sup = 0.667777653078562;         % Area di ingresso in supersonico
-    Parameters.Hin_sup = 0.229589275998660;         % Altezza all'ingresso
-    Parameters.rin = 0.380198703067846;             % Raggio minimo all'ingresso
-    Parameters.Rin = 0.545629511118563;             % Raggio massimo all'ingresso
-    Parameters.A1_sup =  1.514674633685526;          % Area dopo la diffusione subsonica
-    Parameters.Ain_sub = 0.452820254995432;         % Sbagliati
-    Parameters.Hin_sub = 0.152624354077758;         % Sbagliati
-    Parameters.A1_sub = 0.602370359775345;          % Sbagliati
+    Parameters.Hin_sup = 0.229589275998660;         % Altezza all'ingresso in supersonico
+    Parameters.rin = 0.380198703067846;             % Raggio minimo all'ingresso in supersonico
+    Parameters.Rin = 0.545629511118563;             % Raggio massimo all'ingresso in supersonico
+    Parameters.A1_sup =  1.514674633685526;         % Area dopo la diffusione subsonica
+
+    Parameters.Ain_sub = 0.452820254995432;         % Area di ingresso in subsonico
+    Parameters.Hin_sub = 0.152624354077758;         % Altezza all'ingresso in subsonico
+    Parameters.A1_sub = 0.602370359775345;          % Area dopo la diffusione
 end

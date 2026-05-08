@@ -7,18 +7,19 @@ function subCruise = Subcruise_parameters(varargin)
 pi_noAB=0.95;       % Fissato
 pi_b=0.98;          % Fissato
 pi_d = 0.97;        % Fissato
-pi_presa = 0.98;     % Fissato (presa obiettivo)
+eta_presa = 0.97;     % Fissato (presa obiettivo)
 eta_b=0.98;         % Fissato
 eta_n = 0.92;
 et=0.9;
 ec=0.9;
 H_f=43000000;       % Fissato
 eta_m=0.92;
-Tmax_turb = 1400;
+SOT_max = 1200;                              % Massima SOT accettato
+eps_cool = (9/500 * (SOT_max-1100))/100;     % Spillamento per raffreddare la turbina (preso dal grafico)
 
 % Caratteristiche aria e GC
-cp_GC=1150;
-g_GC = 1.33;
+cp_GC=1243;
+g_GC = 1.3;
 
 % Aria a 12km
 Air = Air_parameters('12000');
@@ -40,6 +41,7 @@ T_subsonic=25000;
 v0_subsonic = M_subsonic*sqrt(g_a*R_a*T);
 
 % Presa
+pi_presa = ((1+eta_presa*M_subsonic^2*(g_a-1)/2)/(1+M_subsonic^2*(g_a-1)/2))^(g_a/(g_a-1));
 Ttot1=T*( 1+(g_a-1)/2*M_subsonic^2 );
 ptot1=p*( 1+(g_a-1)/2*M_subsonic^2 )^(g_a/(g_a-1))*pi_presa;
 
@@ -55,10 +57,10 @@ ptot_diff = pi_d*ptot2;
 
 % C.C.
 ptot3=pi_b.*ptot_diff;
-Ttot3= (cp_a.*Ttot2 + f .* H_f.*eta_b)./((1+f).*cp_GC);
+Ttot3= ((1-eps_cool)*cp_a.*Ttot2 + fmat .* H_f.*eta_b)./((1+fmat-eps_cool).*cp_GC);
 
 % Turbina reale
-Ttot4 = Ttot3 - (1/eta_m).*( cp_a./((1+fmat).*cp_GC) ).* (Ttot2-Ttot1);
+Ttot4 = (Ttot3.*cp_GC.*(1+fmat-eps_cool) + eps_cool*cp_a*Ttot2 - (cp_a/eta_m).* (Ttot2-Ttot1)) ./ ( (1+fmat-eps_cool).*cp_GC +eps_cool*cp_a );
 % Turbina ideale
 tau_T= Ttot4./Ttot3;
 pi_t = tau_T.^( g_GC./( et.*(g_GC-1)) );
@@ -78,57 +80,11 @@ m_f =fmat.*m_a;
 I_sp_a = T_subsonic./m_a;
 TSFC=m_f./T_subsonic;
 
-% Ricerca del minimo
-
-% f_min = zeros(1, length(b));
-% b_fmin=zeros(1, length(b));
-% fmin_id = zeros(1, length(b));
-% bmin_id=zeros(1, length(b));
-
-% for i = 1:max(size(b))
-%     [maximum, max_id] = max(TSFC(1:end, i));
-%     if max_id>=max(size(f))
-%         break
-%     else
-%         [minimum, min_id] = min(abs(TSFC(max_id:end, i)));
-%         f_min(i) = f(min_id+max_id-1);
-%         fmin_id(i) = min_id;
-%         bmin_id(i) = i;
-%         b_fmin(i) = b(i);
-%     end
-% end
-% 
-% figure()
-% plot(b_fmin, f_min);
-
-% figure()
-% hold on
-% t=surf(f, b, I_sp');
-% t.EdgeColor='none';
-
-% TSFCmin=zeros(1, length(b));
-% for i=1:length(fmin_id)
-%     TSFCmin(i) = TSFC(fmin_id(i), bmin_id(i));
-% end
-% plot3(f_min, b_fmin, TSFCmin', '--k')
-% pbaspect([1 2 3])
-% %plot(f, TSFC)
-% zlim([0, 0.0001])
-
-
-
-for i=1:size(TSFC, 1)
-    for j=1:size(TSFC, 2)
-        if TSFC(i, j)<=0 || TSFC(i, j)>=1e-4 || Ttot3(i, j)>Tmax_turb
-            TSFC(i, j)=NaN;
-        end
-    end
-end
-
 for i=1:size(I_sp_a, 1)
     for j=1:size(I_sp_a, 2)
-        if I_sp_a(i, j)<=0 || Ttot3(i, j)>Tmax_turb
+        if I_sp_a(i, j)<=0 || Ttot3(i, j)*2/(g_GC+1)>SOT_max || TSFC(i, j)<=0 || TSFC(i, j)>=1e-4
             I_sp_a(i, j)=NaN;
+            TSFC(i, j) = NaN;
         end
     end
 end

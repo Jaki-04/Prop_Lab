@@ -1,16 +1,15 @@
+function [pf, Tf, rhof, Mf, Af] = Presa(varargin)
 %% Ottimizzazione della spina supersonica
 
 Air = Air_parameters('25000');
 p=Air.p;
 T=Air.T;
-rho=Air.rho;
 g = Air.g; 
 R = Air.R;
 
 supCruise = Supercruise_parameters();
 
 M = supCruise.M;        % Mach di ingresso alla presa
-v0_sup = supCruise.v0;
 m_a_sup = supCruise.m_a;
 
 % Angoli del cono e i due angoli di rampa su cui ciclare
@@ -159,17 +158,14 @@ Ain_sup = m_a_sup/ (rho1*v1);             % Area di ingresso del diffusore super
 ds = 0.01;                                % Distanza (parallela alla rampa 3) dell'urto normale dal bordo superiore
 
 s3 = @(h) h/tan(a3);
-l3 = @(h) s3(h)*cos(delta3);
 h3 = @(h) s3(h)*sin(delta3);
 
 s2 = @(h) ((s3(h)*tan(delta3-delta2) + h)*cos(delta3-delta2))*(1/tan(a2) - 1/tan(a3+delta3-delta2));
-l2 = @(h) s2(h)*cos(delta2);
 h2 = @(h) s2(h)*sin(delta2);
 
 h_temp = @(h) (s3(h)*tan(delta3-delta2) + h)*cos(delta3-delta2);
 s_temp = @(h) h_temp(h)/tan(a3+delta3-delta2);
 s1 = @(h) ((s2(h)+s_temp(h))*tan(delta2-delta1) + h_temp(h))*cos(delta2-delta1)*(1/tan(a1) - 1/tan(a2+delta2-delta1));
-l1 = @(h) s1(h)*cos(delta1);
 h1 = @(h) s1(h)*sin(delta1);
 
 r_shock = @(h) h1(h)+h2(h)+h3(h);
@@ -180,7 +176,7 @@ Area_fun = @(h) pi * h * (Rmax_fun(h) + Rmin_fun(h));
 Hin_sup = fsolve(@(h)Area_fun(h)-Ain_sup, 0.4, options);
 r_in = Rmin_fun(Hin_sup);
 R_in = Rmax_fun(Hin_sup);
-L_sup = (R_in-ds*sin(delta3))/tan(a1+delta1)+ds*cos(delta3);
+L_sup = (R_in-ds*sin(delta3))/tan(a1+delta1)+ds*cos(delta3);    % Distanza dalla punta al cowl lip
 
 % Diffusore subsonico dopo l'onda normale
 M2 = 0.25;                                  % Mach target all'ingresso del postbruciatore
@@ -216,14 +212,15 @@ ptot1_sub = p_sub*(1+M_sub^2*(g-1)/2)^(g/(g-1));
 Ain_sub = m_a_sub/(rho_sub*v0_sub);
 rmax_spina = sqrt(R_in^2-Ain_sub/pi);
 h0_d_sub = R_in-rmax_spina;
-phi_inf = deg2rad(10);
+phi_inf = deg2rad(10); 
 
-rt_c = 0.505622310505353;           % Dati dal compressore
-rh_c = 0.252811155252677;           % Dati dal compressore
+rt_c = 0.506560138592840;           % Dati dal compressore
+rh_c = 0.253280069296420;           % Dati dal compressore
 
 deltar_inf = rmax_spina-rh_c;
 deltar_sup = rt_c-R_in;
 L_diff = deltar_inf/tan(phi_inf);
+L_sub = L_diff+sin(acos(r_in/rmax_spina))*rmax_spina;
 phi_sup = atan(deltar_sup/L_diff);
 widthlength_ratio = L_diff/h0_d_sub;
 
@@ -240,8 +237,18 @@ rho2_sub = p2_sub/(R*T2_sub);
 Area_ratio_sub = rho_sub*v0_sub/(rho2_sub*v2_sub);
 A2_sub = Area_ratio_sub*Ain_sub;               % Area di ingresso al compressore
 
-% l2f = l2(h_shock);
-% l3f = l3(h_shock);
-% delta = @(x) delta3*(x<=(l3f+ds*cos(delta3)^2)) + delta2*(x>(l3f+ds*cos(delta3)^2))*(x<=(l2f+l3f+ds*cos(delta3)^2)) + delta1*(x>(l2f+l3f+ds*cos(delta3)^2));
-% Ain_sub_fun = @(x) pi*(R_in+r_in-x*cos( delta(x) )*sin( delta(x) ))*(Hin_sup+x*sin( delta(x) ));
-% dx_sub = fsolve(@(x) Ain_sub_fun(x)-Ain_sub, 0.1, options);
+if ismember('sup', varargin) || ismember('supersonic', varargin) || ismember('Sup', varargin) || ismember('Supersonic', varargin)
+    pf = p2;
+    Tf = T2;
+    rhof = rho2;
+    Mf = M2;
+    Af = A2;
+else
+    pf = p2_sub;
+    Tf = T2_sub;
+    rhof = rho2_sub;
+    Mf = M2_sub;
+    Af = A2_sub;
+end
+
+end
