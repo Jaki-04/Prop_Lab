@@ -15,7 +15,7 @@ ec=0.9;
 H_f=43000000;       % Fissato
 eta_m=0.92;
 SOT_max = 1200;                              % Massima SOT accettato
-eps_cool = (9/500 * (SOT_max-1100))/100;     % Spillamento per raffreddare la turbina (preso dal grafico)
+eps_cool = (9/500 * (SOT_max-1100))/100 * 2;     % Spillamento per raffreddare la turbina (preso dal grafico)
 
 % Caratteristiche aria e GC
 cp_GC=1243;
