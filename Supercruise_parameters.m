@@ -11,7 +11,7 @@ H_f=43000000;       % Fissato
 Tmax_AB = 2100;
 
 % Caratteristiche GC
-cp_GC=1150;
+cp_GC=1243;
 g_GC = 1.33;
 
 

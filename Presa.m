@@ -216,7 +216,7 @@ phi_inf = deg2rad(10);
 
 G = Geometry();
 rt_c = G.Rc_t;           % Dati dal compressore
-rh_c = G.Rc_h;           % Dati dal compressore
+rh_c = G.Rc_h1;           % Dati dal compressore
 
 deltar_inf = rmax_spina-rh_c;
 deltar_sup = rt_c-R_in;
