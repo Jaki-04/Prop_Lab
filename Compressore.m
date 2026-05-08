@@ -1,5 +1,6 @@
-%% Dimensionamento del compressore
+%% Dimensionamento del compressore  (ford Kompressor)
 
+function [p_tOut, T_tOut, M_Out, A_Out_Comp] = Compressore()
 Air = Air_parameters();
 R = Air.R;
 g = Air.g;
@@ -88,3 +89,12 @@ b_stadio = beta^(1/N_stadi);
 N_stadi = ceil(N_stadi);
 beta_real = b_stadio^(N_stadi);
 
+%calcolo le quantità con il beta reale (più realistico wow) 
+
+p_tOut = beta_real * p_tIn;                                % Pressione totale in uscita
+T_tOut = beta_real^((g-1)/(eta_poli*g)) * T_tIn;           % Temperatura totale in uscita con rendimento politropico
+T_Out = T_tOut - (g-1)/(2*g*R)*C_z1^2;                  % Temperatura statica in uscita
+M_Out = C_z1 / sqrt(g * R * T_Out);                     % Mach in uscita
+p_Out = p_tOut/(1 + (g-1)/2 * M_Out^2)^(g/(g-1));       % Pressione statica dell'aria in uscita
+rho_Out = p_Out/(R * T_Out);                            % Rho dell'aria in uscita
+A_Out_Comp = m_a/(rho_Out * C_z1);                      % Area di uscita del compressore HP
