@@ -5,7 +5,7 @@ function subCruise = Subcruise_parameters(varargin)
 
 % Rendimenti e parametri
 pi_noAB=0.95;       % Fissato
-pi_b=0.98;          % Fissato
+pi_b=0.945;          % Fissato
 pi_d = 0.97;        % Fissato
 eta_presa = 0.97;     % Fissato (presa obiettivo)
 eta_b=0.98;         % Fissato
