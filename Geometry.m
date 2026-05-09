@@ -36,5 +36,10 @@ function Parameters = Geometry()
     Parameters.R_diff = 0.522336533245617;          % Raggio massimo del diffusore
     Parameters.r_diff = 0.474592088960632;          % Raggio minimo del diffusore
     Parameters.WLratio_diff = 2.570121914518049;    % Rapporto L/W del diffusore
+
+    Parameters.rm = 0.498464311103125;          % Raggio medio della camera
+    Parameters.href = 0.145861686586823;        % Spessore della camera
+    Parameters.Aref = 0.456830580994646;        % Area di una sezione della camera
+    Parameters.Lcc = 0.670414045111986;         % Lunghezza della camera
     
 end

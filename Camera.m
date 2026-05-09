@@ -38,21 +38,23 @@ WLratio_diff = L_diff_cc/(RIn-rIn);
 
 %% Camera di combustione
 eps_cool = 0.036;            % Spillamento di progetto
-H_f = 43000000;
+H_f = 43*10^6;
 eta_b = 0.98;
 
 % Temperatura in uscita
 g_GC = Air.g_GC;
-cp_GC = Air.g_GC;
+cp_GC = Air.cp_GC;
 T_Out_cc= ((1-eps_cool)*cp_a*T_Out_diff + f * H_f*eta_b)./((1+f-eps_cool)*cp_GC);
 
 % Valori (dalle slide)
 DP_P = 0.06;
 DP_qref = 20;
-I = 10*10^6;
+I = 10*10^6;        % Capire che valore mettere (cercare qualche paper, slide dicono da 8 a 10)
 
 Aref = ((R_a/2) * (m_a * T_Out_diff^0.5 / p_Out_diff)^2 * DP_qref * DP_P^-1)^0.5;
 rm = (ROut_diff+rOut_diff)/2;
 href = Aref/(2*pi*rm);
-Vcc = (H_f*f*m_a*(1-eps))/(I*(p_Out_diff/10^5));
-Lcc = Vcc/(2*pi*rm*href);
+
+n = 1.8;                                                           % Esponente per l'efficienza cinetica (citare qualche paper)
+Vcc = (H_f*f*m_a*(1-eps_cool)*eta_b)/(I*(p_Out_diff/10^5)^n);    % Equazione di Lefevre per l'intensità di combustione
+Lcc = Vcc/(2*pi*rm*href);                                        % Stima della lunghezza della camera
