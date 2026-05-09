@@ -1,6 +1,6 @@
 %% Dimensionamento del compressore  (ford Kompressor)
 
-function [p_tOut, T_tOut, M_Out, A_Out_Comp] = Compressore()
+function [p_tOut, T_tOut, M_Out, A_Out_Comp, L_compressore] = Compressore()
 Air = Air_parameters();
 R = Air.R;
 g = Air.g;
@@ -11,90 +11,144 @@ m_a = S.m_a;
 
 [pf, Tf, rhof, Mf, Af] = Presa('sub');
 % Valori di ingresso
-    Min = Mf;              
+    M_In = Mf;              
     p_In = pf;
-    p_tIn = p_In*(1 + (g-1)/2 * Min^2)^(g/(g-1));
+    p_tIn = p_In*(1 + (g-1)/2 * M_In^2)^(g/(g-1));
     T_In = Tf;
-    T_tIn = T_In*(1 + (g-1)/2 * Min^2);
-    rho_In = rhof;
 
-C_z1 = Min*sqrt(g*R*T_In);                              % Velocità assiale (costante)
+% Determinazione sezione di uscita
+
+C_z1 = M_In*sqrt(g*R*T_In);                              % Velocità assiale (costante)
 A_in_comp = Af;                                         % Area di ingresso nel compressore
 
 eta_poli=0.9;                                           % Rendimento politropico del compressore (costante)
 beta = S.b;                                             % Rapporto di compressione (noto)
 
-p_tOut = beta * p_tIn;                                % Pressione totale in uscita
-T_tOut = beta^((g-1)/(eta_poli*g)) * T_tIn;           % Temperatura totale in uscita con rendimento politropico
-T_Out = T_tOut - (g-1)/(2*g*R)*C_z1^2;                  % Temperatura statica in uscita
-M_Out = C_z1 / sqrt(g * R * T_Out);                     % Mach in uscita
-p_Out = p_tOut/(1 + (g-1)/2 * M_Out^2)^(g/(g-1));       % Pressione statica dell'aria in uscita
-rho_Out = p_Out/(R * T_Out);                            % Rho dell'aria in uscita
-A_Out_comp = m_a/(rho_Out * C_z1);                      % Area di uscita del compressore HP
-
-% Dimensionamento con primo stadio r_h1/r_t1 = 0.5
+% Dimensionamento con primo stadio r_h1/r_t = 0.5
 a=0.5;
 r_t = sqrt(A_in_comp/(pi*(1-a^2)));
 r_h1 = r_t*a;
-r_he = sqrt(r_t^2-(A_Out_comp)/pi);
-r_pitch = (r_t+r_h1)/2;
+r_pitch1 = (r_t+r_h1)/2;
 
-% Omega necessarie ad avere Mrel=1 sulla pitchline
+% Omega necessarie ad avere Mrel=1 sulla pitchline del primo stadio
 U_pitch = @(omega, r_pitch) omega*r_pitch;
 Mrel = @(omega, r_pitch, T) sqrt(C_z1^2+U_pitch(omega, r_pitch)^2)/sqrt(g*R*T);
-omega = fsolve(@(omega) Mrel(omega, r_pitch, T_In)-1, 7000, options);
+omega = fsolve(@(omega) Mrel(omega, r_pitch1, T_In)-1, 7000, options);
 
-U_pitch = omega*r_pitch;
-W1 = sqrt(U_pitch.^2 + C_z1.^2);
-W2 = 0.72*W1;
-gamma = asin(C_z1/W2);
-C2 = sqrt(W2^2+U_pitch^2-2*U_pitch*W2*cos(gamma));
-Cteta2 = sqrt(C2^2-C_z1^2);
+% Ciclo su tutti gli stadi necessari
+A_In_stadio = A_in_comp;
+T_In_stadio = T_In;
+p_tIn_stadio = p_tIn;
+M_In_stadio = M_In;
+beta_real = 1;
+N_stadi = 0;
 
-% Coefficienti di diffusione (devono essere <=0.6 per non avere separazione)
-sigma_r = 1;
-sigma_s = 1.25;
+l_stadio = zeros(1, 10);
+stage_space = zeros(1, 10);
+r_hub = zeros(1, 10);
+cord_r = zeros(1, 10);
+spacing_r = zeros(1, 10);
+cord_s = zeros(1, 10);
+spacing_s = zeros(1, 10);
+bladeN_r = zeros(1, 10);
+bladeN_s = zeros(1, 10);
+gR = zeros(1, 10);
+Dr = zeros(1, 10);
+Ds = zeros(1, 10);
 
-Dcoeff_r = 1-W2/W1+Cteta2/(2*sigma_r*W1);
-Dcoeff_s = 1-C_z1/C2+Cteta2/(2*sigma_s*C2);
+while beta_real<beta
 
-% Grado di reazione
-R_c = 1-Cteta2/(2*U_pitch);
+    r_h_stadio = sqrt(r_t^2-A_In_stadio/pi);
+    r_hub(N_stadi+1) = r_h_stadio; 
+    
+    % Triangolo di velocità per lo stadio corrente
+    r_pitch_stadio = (r_t+r_h_stadio)/2;
+    U_pitch_stadio = omega*r_pitch_stadio;
+    W1 = sqrt(U_pitch_stadio.^2 + C_z1.^2);
+    W2 = 0.72*W1;
+    gamma = asin(C_z1/W2);
+    C2 = sqrt(W2^2+U_pitch_stadio^2-2*U_pitch_stadio*W2*cos(gamma));
+    Cteta2 = sqrt(C2^2-C_z1^2);
+    
+    % Lavoro dello stadio corrente 
+    L_stadio = U_pitch_stadio*(Cteta2);
 
-% Corda rotore e statore
-nu1 = 4.67*10^-5;
+    % Temperatura totale in uscita
+    T_tIn_stadio = T_In_stadio*(1+M_In_stadio^2*(g-1)/2);
+    T_Out_stadio = L_stadio/cp + T_In_stadio;
+    M_Out_stadio = C_z1 / sqrt(g * R * T_Out_stadio); 
+    T_tOut_stadio = T_Out_stadio*(1+M_Out_stadio^2*(g-1)/2);
 
-cr = 300000*nu1/W1;
+    % Rapporto di compressione ottenuto (con rendimento)
+    b_stadio = (T_tOut_stadio/T_tIn_stadio)^( 1/((g-1)/(eta_poli*g)) );
+    p_tOut_stadio = b_stadio * p_tIn_stadio;                                                 
+    p_Out_stadio = p_tOut_stadio/(1 + (g-1)/2 * M_Out_stadio^2)^(g/(g-1)); 
 
-cs = 300000*nu1/C2;
+    % Sezione di uscita dello stadio
+    rho_Out_stadio = p_Out_stadio/(R * T_Out_stadio);                            
+    A_Out_stadio = m_a/(rho_Out_stadio * C_z1);                      
+    
+    
+    % Coefficienti di diffusione (devono essere <=0.6 per non avere separazione)
+    %sigma_r = 1;
+    %sigma_s = 1.25;
+    
+    Dcoeff_r_stadio = @(sigma_r) 1-W2/W1+Cteta2/(2*sigma_r*W1);
+    sigma_r = fsolve(@(sigma_r) Dcoeff_r_stadio(sigma_r) -0.55, 1, options);      % Impongo D=0.55 e trovo sigma_r
+    Dr(N_stadi+1) = sigma_r;
+    Dcoeff_s_stadio = @(sigma_s) 1-C_z1/C2+Cteta2/(2*sigma_s*C2);
+    sigma_s = fsolve(@(sigma_s) Dcoeff_s_stadio(sigma_s) -0.55, 1, options);      % Impongo D=0.55 e trovo sigma_s
+    Ds(N_stadi+1) = sigma_s;
+    
+    % Grado di reazione
+    R_c_stadio = 1-Cteta2/(2*U_pitch_stadio);
+    gR(N_stadi+1) = R_c_stadio;
+    
+    % Corda rotore e statore fissando il Re minimo
+    nu1 = 4.67*10^-5;
+    
+    cr_stadio = 300000*nu1/W1;
+    cord_r(N_stadi+1) = cr_stadio;
+    
+    cs_stadio = 300000*nu1/C2;
+    cord_s(N_stadi+1) = cs_stadio;
+    
+    % Spaziatura pale rotore e statore usando i sigma dati
+    
+    sr_stadio = cr_stadio/sigma_r;
+    spacing_r(N_stadi+1) = sr_stadio;
+    
+    ss_stadio = cs_stadio/sigma_s;
+    spacing_s(N_stadi+1) = ss_stadio;
 
-% Spaziatura rotore e statore
+    % Lunghezza approssimativa dello stadio 
+    l_r = cr_stadio*cos(pi/2-gamma);                                                % Corda inclinata uguale a W2;
+    l_s = cs_stadio/2*sin(atan(C_z1/(U_pitch_stadio-W2*cos(gamma))))+cs_stadio/2;   % Corda metà inclinata come C2 e metà orizzontale
+    stage_space(N_stadi+1) = cs_stadio*0.35;      % https://journals.sagepub.com/doi/10.1177/0957650914531949
+    l_stadio(N_stadi+1) = (l_s+l_r+stage_space(N_stadi+1));        
+     
+    % Numero di pale
+    
+    Nr_stadio = (2*pi*r_pitch_stadio)/sr_stadio;
+    bladeN_r(N_stadi+1) = ceil(Nr_stadio);
+    
+    Ns_stadio = (2*pi*r_pitch_stadio)/ss_stadio;
+    bladeN_s(N_stadi+1) = ceil(Ns_stadio);
+    
+    % Aggiorno beta_real
+    beta_real = beta_real*b_stadio;
+    N_stadi = N_stadi +1;
 
-sr = cr/sigma_r;
+    % Aggiorno quantità in ingresso allo stadio successivo
+    A_In_stadio = A_Out_stadio;
+    T_In_stadio = T_Out_stadio;
+    p_tIn_stadio = p_tOut_stadio;
+    M_In_stadio = M_Out_stadio;
+    
+end
 
-ss = cs/sigma_s;
-
-% Numero di pale
-
-Nr = (2*pi*r_pitch)/sr;
-
-Ns = (2*pi*r_pitch)/ss;
-
-% Lavoro di uno stadio
-
-L_comp = U_pitch*(Cteta2);
-Ltot_comp = cp*(T_Out-T_In);
-N_stadi = Ltot_comp/L_comp;
-b_stadio = beta^(1/N_stadi);
-N_stadi = ceil(N_stadi);
-beta_real = b_stadio^(N_stadi);
-
-%calcolo le quantità con il beta reale (più realistico wow) 
-
-p_tOut = beta_real * p_tIn;                                % Pressione totale in uscita
-T_tOut = beta_real^((g-1)/(eta_poli*g)) * T_tIn;           % Temperatura totale in uscita con rendimento politropico
-T_Out = T_tOut - (g-1)/(2*g*R)*C_z1^2;                  % Temperatura statica in uscita
-M_Out = C_z1 / sqrt(g * R * T_Out);                     % Mach in uscita
-p_Out = p_tOut/(1 + (g-1)/2 * M_Out^2)^(g/(g-1));       % Pressione statica dell'aria in uscita
-rho_Out = p_Out/(R * T_Out);                            % Rho dell'aria in uscita
-A_Out_Comp = m_a/(rho_Out * C_z1);                      % Area di uscita del compressore HP
+p_tOut = p_tIn_stadio;
+M_Out = M_In_stadio;
+T_tOut = T_In_stadio*(1+M_Out^2*(g-1)/2);
+A_Out_Comp = A_In_stadio;
+L_compressore= sum(l_stadio)+stage_space(end);
