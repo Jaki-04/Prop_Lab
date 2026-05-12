@@ -5,6 +5,7 @@ clc
 %% Dimensionamento post combustore
 
 supCruise = Supercruise_parameters();
+Air = Air_parameters('25000');
 
 m_a = supCruise.m_a;
 f = supCruise.f;
@@ -18,12 +19,12 @@ L_H_ratio = 3.2; %arbitrario
 B = 0.28; %arbitrario
 
 % Parametri termodinamici
-cp_a = 1004;                % Calore specifico aria [J/kgK]
-cp_GC = 1243;               % Calore specifico gas combusti [J/kgK]
+cp_a = Air.cp;              % Calore specifico aria [J/kgK]
+cp_GC = Air.cp_GC;          % Calore specifico gas combusti [J/kgK]
 H_f = 43000000;             % Potere calorifico [J/kg]
 eta_AB = 0.92;              % Rendimento post-combustore
 
-% Temperatura all'uscita
+% Temperatura totale all'uscita
 T_t7 = (cp_a * Ttot1 + f * H_f * eta_AB) / ((1 + f) * cp_GC);
 
 % dimensioni post bruciatore
