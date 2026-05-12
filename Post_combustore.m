@@ -9,18 +9,17 @@ supCruise = Supercruise_parameters();
 m_a = supCruise.m_a;
 f = supCruise.f;
 
-% da presa.m da sistemare con mach 0,25
+% da presa.m
 Ttot1 = 747.4425;
 v2 = 267.4095;
-A2 = 1.514674633685526; % da sistemare perchè dovrebbe esserci pi_AB = 0.95 se acceso
+A2 = 1.5147;
 r_t5 = 0.45; %numero a caso da calcolare poi
 L_H_ratio = 3.2; %arbitrario
 B = 0.28; %arbitrario
 
 % Parametri termodinamici
-cp_a = 1005;                % Calore specifico aria [J/kgK] in air parameters...
-                            % è 1000, secondo me deve essere 1005
-cp_GC = 1150;               % Calore specifico gas combusti [J/kgK]
+cp_a = 1004;                % Calore specifico aria [J/kgK]
+cp_GC = 1243;               % Calore specifico gas combusti [J/kgK]
 H_f = 43000000;             % Potere calorifico [J/kg]
 eta_AB = 0.92;              % Rendimento post-combustore
 
