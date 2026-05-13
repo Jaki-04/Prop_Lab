@@ -18,20 +18,18 @@ cp_GC = Air.cp_GC;
 
 p_t7 = 1.2929e+05;
 T_t7 = 1.5547e+03;
+D_ram = 1.6549;
 
 soglia_n = 1.05;
 
 %% Ugello supersonico
 
 % Area di gola
-% Funzione di Vandenkerckhove per la portata in blocco sonico
+% Funzione di Vandenkerckhove
 Gamma = sqrt(g_GC) * (2 / (g_GC + 1))^((g_GC + 1) / (2 * (g_GC - 1)));
 
-% Dimensionamento fisico della gola (resta fissa per il nostro motore)
+% Dimensionamento della gola
 A_g = (m_tot * sqrt(R_GC * T_t7)) / (p_t7 * Gamma);
-
-% Spinte al punto operativo
-NPR = p_t7 / p0;
 
 % Spinta ugello CD (espansione ottima)
 v_e = sqrt(2 * cp_GC * T_t7 * (1 - (p0 / p_t7)^((g_GC-1)/g_GC)));
@@ -66,3 +64,16 @@ ratio_A = (1 / M_e) * ( (2 / (g_GC + 1)) * (1 + ((g_GC - 1) / 2) * M_e^2) )...
 A_e = A_g * ratio_A;
 D_g = 2 * sqrt(A_g / pi);
 D_e = 2 * sqrt(A_e / pi);
+
+% Scelta degli angoli
+theta_c_deg = 50;
+theta_d_deg = 15;
+
+% Conversione in radianti
+theta_c = deg2rad(theta_c_deg);
+theta_d = deg2rad(theta_d_deg);
+
+% Calcolo delle lunghezze geometriche
+L_c = (D_ram - D_g) / (2 * tan(theta_c)); % Lunghezza del convergente
+L_d = (D_e - D_g) / (2 * tan(theta_d));   % Lunghezza del divergente
+L_tot = L_c + L_d;                        % Lunghezza totale dell'ugello

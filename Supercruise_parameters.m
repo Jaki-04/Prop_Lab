@@ -48,7 +48,6 @@ m_a=T_supercruise./((1+f).*ve-v0_supercruise);
 m_f =f.*m_a;
 
 % Parametri di merito
-
 I_sp_a = T_supercruise./m_a;
 TSFC=m_f./T_supercruise;
 [TSFC_min, F_min] = min(TSFC);
