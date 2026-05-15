@@ -9,17 +9,13 @@ pi_b=0.945;          % Fissato
 pi_d = 0.97;        % Fissato
 eta_presa = 0.97;     % Fissato (presa obiettivo)
 eta_b=0.98;         % Fissato
-eta_n = 0.92;
+eta_n = 0.98;
 et=0.9;
 ec=0.9;
 H_f=43000000;       % Fissato
 eta_m=0.92;
 SOT_max = 1200;                              % Massima SOT accettato
 eps_cool = (9/500 * (SOT_max-1100))/100 * 2;     % Spillamento per raffreddare la turbina (preso dal grafico)
-
-% Caratteristiche aria e GC
-cp_GC=1243;
-g_GC = 1.3;
 
 % Aria a 12km
 Air = Air_parameters('12000');
@@ -28,6 +24,10 @@ T= Air.T;
 cp_a = Air.cp;
 g_a = Air.g;
 R_a = Air.R;
+
+% Caratteristiche aria e GC
+cp_GC=Air.cp_GC;
+g_GC =Air.g_GC;
 
 f=(0.01:0.0001:0.04)';
 b=(2:0.05:40);

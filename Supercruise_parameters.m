@@ -6,14 +6,9 @@ function supCruise = Supercruise_parameters(varargin)
 pi_AB = 0.95;       % Fissato
 pi_d_sup = 0.7;     % Fissato (presa obiettivo)
 eta_AB=0.92;
-eta_n = 0.92;
+eta_n = 0.98;
 H_f=43000000;       % Fissato
 Tmax_AB = 2100;
-
-% Caratteristiche GC
-cp_GC=1243;
-g_GC = 1.33;
-
 
 % Aria a 25km
 Air = Air_parameters('25000');
@@ -22,6 +17,11 @@ T=Air.T;
 cp_a=Air.cp;
 g_a = Air.g;
 R_a = Air.R;
+
+
+% Caratteristiche GC
+cp_GC=Air.cp_GC;
+g_GC =Air.g_GC;
 
 % Ciclo su f
 f=0.0045:0.0001:0.1;
