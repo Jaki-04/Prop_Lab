@@ -13,9 +13,7 @@ eta_n = 0.98;
 et=0.9;
 ec=0.9;
 H_f=43000000;       % Fissato
-eta_m=0.92;
-SOT_max = 1200;                              % Massima SOT accettato
-eps_cool = (9/500 * (SOT_max-1100))/100 * 2;     % Spillamento per raffreddare la turbina (preso dal grafico)
+eta_m=0.92;                            % Massima SOT accettato
 
 % Aria a 12km
 Air = Air_parameters('12000');
@@ -29,11 +27,12 @@ R_a = Air.R;
 cp_GC=Air.cp_GC;
 g_GC =Air.g_GC;
 
-f=(0.01:0.0001:0.04)';
+% Parametri: beta e temperatura di ingresso in turbina
+Ttot3=(1100:10:1700);
 b=(2:0.05:40);
 
-fmat = f*ones(1, max(size(b)));
-bmat = ones(max(size(f)), 1)*b;
+Tt3mat = Ttot3'*ones(1, max(size(b)));
+bmat = ones(max(size(Ttot3)), 1)*b;
 
 % Regime subsonico
 M_subsonic = 0.85;
@@ -57,12 +56,15 @@ ptot_diff = pi_d*ptot2;
 
 % C.C.
 ptot3=pi_b.*ptot_diff;
-Ttot3= ((1-eps_cool)*cp_a.*Ttot2 + fmat .* H_f.*eta_b)./((1+fmat-eps_cool).*cp_GC);
+SOT = Tt3mat.*2./(g_GC+1);
+eps_cool = (9/500 * (SOT-1100))/100 * 2;     % Spillamento per raffreddare la turbina (preso dal grafico)
+
+fmat = ((1-eps_cool).*cp_a.*Ttot2-Tt3mat.*cp_GC+eps_cool.*Ttot2.*cp_GC)./(Tt3mat.*cp_GC-H_f.*eta_b);
 
 % Turbina reale
-Ttot4 = (Ttot3.*cp_GC.*(1+fmat-eps_cool) + eps_cool*cp_a*Ttot2 - (cp_a/eta_m).* (Ttot2-Ttot1)) ./ ( (1+fmat-eps_cool).*cp_GC +eps_cool*cp_a );
+Ttot4 = (Tt3mat.*cp_GC.*(1+fmat-eps_cool) + eps_cool.*cp_a.*Ttot2 - (cp_a./eta_m).* (Ttot2-Ttot1)) ./ ( (1+fmat-eps_cool).*cp_GC +eps_cool.*cp_a );
 % Turbina ideale
-tau_T= Ttot4./Ttot3;
+tau_T= Ttot4./Tt3mat;
 pi_t = tau_T.^( g_GC./( et.*(g_GC-1)) );
 ptot4 = ptot3.*pi_t;
 
@@ -71,18 +73,17 @@ ptot_AB = ptot4.*pi_noAB;
 Ttot_AB = Ttot4;
 
 % Ugello
-T_ratio = 1-(p./ptot_AB).^( (g_GC-1)./(g_GC) );
-ve = sqrt( 2.*cp_GC.*Ttot_AB.*eta_n.*T_ratio );
-m_a=T_subsonic./((1+fmat).*ve-v0_subsonic);
-m_f =fmat.*m_a;
+T_ratio = (p./ptot_AB).^( (g_GC-1)./(g_GC) );
+ve = sqrt( 2.*cp_GC.*Ttot_AB.*eta_n.*(1-T_ratio) );
+I_sp_a = ((1+fmat).*ve-v0_subsonic);
+
 
 % Parametri di merito
-I_sp_a = T_subsonic./m_a;
-TSFC=m_f./T_subsonic;
+TSFC=fmat./I_sp_a;
 
 for i=1:size(I_sp_a, 1)
     for j=1:size(I_sp_a, 2)
-        if I_sp_a(i, j)<=0 || Ttot3(i, j)*2/(g_GC+1)>SOT_max || TSFC(i, j)<=0 || TSFC(i, j)>=1e-4
+        if I_sp_a(i, j)<=0 || TSFC(i, j)<=0 || TSFC(i, j)>=1e-4
             I_sp_a(i, j)=NaN;
             TSFC(i, j) = NaN;
         end
@@ -92,58 +93,58 @@ end
 maxValue = max(max(I_sp_a));
 [ind12, ind22] = find(I_sp_a==maxValue);
 
-if ismember('plot', varargin)
-    figure()
-    t=surf(f, b, I_sp_a');
-    view([1, 1, 0.25])
-    t.EdgeColor='none';
-    pbaspect([1, 1, 1])
-    hold on;
-    plot3(f(ind12), b(ind22), I_sp_a(ind12, ind22),'o', 'Color', 'r', 'MarkerFaceColor','r')
-    x=t.XData;
-    y=t.YData;
-    z=t.ZData;
-    %%Create vectors out of surface's XData and YData
-    x=x(:,1);
-    y=y(1,:);
-    %%Divide the lengths by the number of lines needed
-    xnumlines = 50; % 10 lines
-    ynumlines =50; % 10 partitions
-    xspacing = round(length(x)/xnumlines);
-    yspacing = round(length(y)/ynumlines);
-    %%Plot the mesh lines 
-    % Plotting lines in the X-Z plane
-    hold on
-    for i = 1:yspacing:length(y)
-        Y1 = y(i)*ones(size(x)); % a constant vector
-        Z1 = z(i,:);
-        plot3(x,Y1,Z1,'-k');
-    end
-    % Plotting lines in the Y-Z plane
-    for i = 1:xspacing:length(x)
-        X2 = x(i)*ones(size(y)); % a constant vector
-        Z2 = z(:,i);
-        plot3(X2,y,Z2,'-k');
-    end
+% if ismember('plot', varargin)
+%     figure()
+%     t=surf(Ttot3, b, I_sp_a');
+%     view([1, 1, 0.25])
+%     t.EdgeColor='none';
+%     pbaspect([1, 1, 1])
+%     hold on;
+%     plot3(f(ind12), b(ind22), I_sp_a(ind12, ind22),'o', 'Color', 'r', 'MarkerFaceColor','r')
+%     x=t.XData;
+%     y=t.YData;
+%     z=t.ZData;
+%     %%Create vectors out of surface's XData and YData
+%     x=x(:,1);
+%     y=y(1,:);
+%     %%Divide the lengths by the number of lines needed
+%     xnumlines = 50; % 10 lines
+%     ynumlines =50; % 10 partitions
+%     xspacing = round(length(x)/xnumlines);
+%     yspacing = round(length(y)/ynumlines);
+%     %%Plot the mesh lines 
+%     % Plotting lines in the X-Z plane
+%     hold on
+%     for i = 1:yspacing:length(y)
+%         Y1 = y(i)*ones(size(x)); % a constant vector
+%         Z1 = z(i,:);
+%         plot3(x,Y1,Z1,'-k');
+%     end
+%     % Plotting lines in the Y-Z plane
+%     for i = 1:xspacing:length(x)
+%         X2 = x(i)*ones(size(y)); % a constant vector
+%         Z2 = z(:,i);
+%         plot3(X2,y,Z2,'-k');
+%     end
+% 
+%     figure()
+%     t=surf(f, b, TSFC');
+%     view([1, 1, 1])
+%     t.EdgeColor='none';
+%     pbaspect([1, 1, 1])
+%     hold on;
+%     plot3(f(ind12), b(ind22),TSFC(ind12, ind22),'o', 'Color', 'r', 'MarkerFaceColor','r')
+% 
+%     % TSFC diminuisce con beta; per ogni beta ha un ottimo su f
+%     % I_sp_a ha un ottimo a un certo beta e un certo f
+% 
+% 
+% end
 
-    figure()
-    t=surf(f, b, TSFC');
-    view([1, 1, 1])
-    t.EdgeColor='none';
-    pbaspect([1, 1, 1])
-    hold on;
-    plot3(f(ind12), b(ind22),TSFC(ind12, ind22),'o', 'Color', 'r', 'MarkerFaceColor','r')
-
-    % TSFC diminuisce con beta; per ogni beta ha un ottimo su f
-    % I_sp_a ha un ottimo a un certo beta e un certo f
-
-    
-end
-
-subCruise.m_a = m_a(ind12, ind22);
 subCruise.f=fmat(ind12, ind22);
 subCruise.b=bmat(ind12, ind22);
 subCruise.I_sp_a=I_sp_a(ind12, ind22);
 subCruise.TSFC=TSFC(ind12, ind22);
 subCruise.M=M_subsonic;
 subCruise.v0=v0_subsonic;
+surf(Ttot3, b, TSFC')
