@@ -4,7 +4,7 @@ function supCruise = Supercruise_parameters(varargin)
 
 % Rendimenti e parametri
 pi_AB = 0.95;       % Fissato
-pi_d_sup = 0.74;     % Fissato (presa obiettivo)
+pi_d_sup = 0.73;     % Fissato (presa obiettivo)
 eta_AB=0.98;
 eta_n = 0.98;
 H_f=43000000;       % Fissato

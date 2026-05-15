@@ -148,4 +148,3 @@ subCruise.I_sp_a=I_sp_a(ind12, ind22);
 subCruise.TSFC=TSFC(ind12, ind22);
 subCruise.M=M_subsonic;
 subCruise.v0=v0_subsonic;
-surf(Ttot3, b, TSFC')

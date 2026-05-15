@@ -1,5 +1,4 @@
-clc;
-clearvars;
+function [p_Out_cc, T_Out_cc, MOut] = Camera()
 
 
 S = Subcruise_parameters();
@@ -37,9 +36,10 @@ L_diff_cc = deltar/sin(teta);
 WLratio_diff = L_diff_cc/(RIn-rIn);
 
 %% Camera di combustione
-eps_cool = 0.036;            % Spillamento di progetto
+eps_cool = 0.05;            % Spillamento di progetto
 H_f = 43*10^6;
 eta_b = 0.98;
+MOut = M_Out_diff;
 
 % Temperatura in uscita
 g_GC = Air.g_GC;
@@ -54,7 +54,7 @@ I = 10*10^6;        % Capire che valore mettere (cercare qualche paper, slide di
 Aref = ((R_a/2) * (m_a * T_Out_diff^0.5 / p_Out_diff)^2 * DP_qref * DP_P^-1)^0.5;
 rm = (ROut_diff+rOut_diff)/2;
 href = Aref/(2*pi*rm);
-
+MOut = 0.5;     % Mach in ingresso alla turbina
 n = 1.8;                                                           % Esponente per l'efficienza cinetica (citare qualche paper)
 Vcc = (H_f*f*m_a*(1-eps_cool)*eta_b)/(I*(p_Out_diff/10^5)^n);    % Equazione di Lefevre per l'intensità di combustione
 Lcc = Vcc/(2*pi*rm*href);                                        % Stima della lunghezza della camera
