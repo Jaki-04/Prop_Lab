@@ -4,10 +4,10 @@
 function subCruise = Subcruise_parameters(varargin)
 
 % Rendimenti e parametri
-pi_noAB=0.95;       % Fissato
-pi_b=0.945;          % Fissato
-pi_d = 0.97;        % Fissato
-eta_presa = 0.97;     % Fissato (presa obiettivo)
+pi_noAB=0.99;       % Fissato
+pi_b=0.95;          % Fissato
+pi_d = 0.98;        % Fissato
+eta_presa = 0.98;     % Fissato (presa obiettivo)
 eta_b=0.98;         % Fissato
 eta_n = 0.98;
 et=0.9;
@@ -83,7 +83,7 @@ TSFC=fmat./I_sp_a;
 
 for i=1:size(I_sp_a, 1)
     for j=1:size(I_sp_a, 2)
-        if I_sp_a(i, j)<=0 || TSFC(i, j)<=0 || TSFC(i, j)>=1e-4
+        if I_sp_a(i, j)<=0 || TSFC(i, j)<=0 || TSFC(i, j)>=1e-4 || eps_cool(i, j)>0.05
             I_sp_a(i, j)=NaN;
             TSFC(i, j) = NaN;
         end
@@ -141,6 +141,7 @@ maxValue = max(max(I_sp_a));
 % 
 % end
 
+subCruise.m_a = T_subsonic/I_sp_a(ind12, ind22);
 subCruise.f=fmat(ind12, ind22);
 subCruise.b=bmat(ind12, ind22);
 subCruise.I_sp_a=I_sp_a(ind12, ind22);

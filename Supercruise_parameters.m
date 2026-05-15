@@ -5,10 +5,11 @@ function supCruise = Supercruise_parameters(varargin)
 % Rendimenti e parametri
 pi_AB = 0.95;       % Fissato
 pi_d_sup = 0.74;     % Fissato (presa obiettivo)
-eta_AB=0.92;
+eta_AB=0.98;
 eta_n = 0.98;
 H_f=43000000;       % Fissato
 Tmax_AB = 2100;
+T_supercruise = 65000;
 
 % Aria a 25km
 Air = Air_parameters('25000');
@@ -24,7 +25,7 @@ cp_GC=Air.cp_GC;
 g_GC =Air.g_GC;
 
 % Ciclo su Ttot_AB
-Ttot_AB = 
+Ttot2 = 1000:1:Tmax_AB;
 
 % Crociera supersonica
 M_supercruise = 3.5;
@@ -36,7 +37,7 @@ ptot1=p*(1+(g_a-1)/2*M_supercruise^2)^(g_a/(g_a-1))*pi_d_sup;
 
 % AB
 ptot2=pi_AB*ptot1;
-f = (cp_a.*Ttot1-Ttot2.*cp_GC)./(Ttot2.*cp_GC-H_f.*eta_b);
+f = (cp_a.*Ttot1-Ttot2.*cp_GC)./(Ttot2.*cp_GC-H_f.*eta_AB);
 
 % Ugello
 T_ratio = (p/ptot2).^( (g_GC-1)/(g_GC) );
@@ -58,7 +59,7 @@ if ismember('plot', varargin)
     legend("$TSFC$","", "$TSFC_{min}$", 'Interpreter','latex');
 end
 
-supCruise.m_a=m_a(F_min);
+supCruise.m_a=T_supercruise/I_sp_a(F_min);
 supCruise.f = f(F_min);
 supCruise.I_sp_a=I_sp_a(F_min);
 supCruise.TSFC=TSFC(F_min);
