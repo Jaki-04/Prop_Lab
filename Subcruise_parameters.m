@@ -4,15 +4,15 @@
 function subCruise = Subcruise_parameters(varargin)
 
 % Rendimenti e parametri
-pi_noAB=0.95;       % Fissato
+pi_noAB=0.98;        % Fissato
 pi_b=0.945;          % Fissato
-pi_d = 0.97;        % Fissato
-eta_presa = 0.97;     % Fissato (presa obiettivo)
-eta_b=0.98;         % Fissato
+pi_d = 0.97;         % Fissato
+eta_presa = 0.97;    % Fissato (presa obiettivo)
+eta_b=0.98;          % Fissato
 eta_n = 0.92;
 et=0.9;
 ec=0.9;
-H_f=43000000;       % Fissato
+H_f=43000000;        % Fissato
 eta_m=0.92;
 SOT_max = 1200;                              % Massima SOT accettato
 eps_cool = (9/500 * (SOT_max-1100))/100 * 2;     % Spillamento per raffreddare la turbina (preso dal grafico)
