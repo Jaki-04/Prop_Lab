@@ -53,6 +53,9 @@ TSFC=(f./I_sp_a)*1000*3600;
 TSFCmax = 24000*3600/((5000/1.0327)*65);
 D_e = 2*sqrt((65000./I_sp_a)./(rhoe.*ve*pi));
 
+TSFC(I_sp_a <= 0) = NaN;
+TSFC(f <= 0) = NaN;
+
 for i = 1:length(Ttot2)
     if TSFC(i)>=TSFCmax
         TSFC(i) = NaN;

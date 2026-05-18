@@ -16,9 +16,9 @@ g_GC = Air.g_GC;
 R_GC = Air.R_GC;
 cp_GC = Air.cp_GC;
 
-p_t7 = 1.2929e+05;
-T_t7 = 1.5547e+03;
-D_ram = 1.6549;
+p_t7 = 1.3483e+05;
+T_t7 = 1.461e+03;
+H_ram = 1.6902;
 
 soglia_n = 1.05;
 
@@ -67,13 +67,13 @@ D_e = 2 * sqrt(A_e / pi);
 
 % Scelta degli angoli
 theta_c_deg = 50;
-theta_d_deg = 15;
+theta_d_deg = 25;
 
 % Conversione in radianti
 theta_c = deg2rad(theta_c_deg);
 theta_d = deg2rad(theta_d_deg);
 
 % Calcolo delle lunghezze geometriche
-L_c = (D_ram - D_g) / (2 * tan(theta_c)); % Lunghezza del convergente
+L_c = (H_ram - D_g) / (2 * tan(theta_c)); % Lunghezza del convergente
 L_d = (D_e - D_g) / (2 * tan(theta_d));   % Lunghezza del divergente
 L_tot = L_c + L_d;                        % Lunghezza totale dell'ugello
