@@ -1,4 +1,4 @@
-function [pf, Tf, rhof, Mf, Af] = Presa(varargin)
+%function [pf, Tf, rhof, Mf, Af] = Presa(varargin)
 % %% Ottimizzazione della spina supersonica
 % 
 Air = Air_parameters('25000');
@@ -110,6 +110,28 @@ for ramp1_id = 1:length(ramp_angles1)
         alpha3_grid(:, ramp1_id, ramp2_id) = alpha3;
     end
 end
+
+max_toPlot1 = zeros(1, length(cone_angles));
+max_toPlot2 = zeros(1, length(cone_angles));
+max_toPlot3 = zeros(1, length(cone_angles));
+
+for id1 = 1:length(cone_angles)
+        max_toPlot1(id1) = max(max(ptot_grid(id1, :, :)));
+end
+
+for id2 = 1:length(cone_angles)
+        max_toPlot2(id2) = max(max(ptot_grid(:, id2, :)));
+end
+
+for id3 = 1:length(cone_angles)
+        max_toPlot3(id3) = max(max(ptot_grid(:, :, id3)));
+end
+figure()
+plot(cone_angles, max_toPlot1,'LineWidth',1)
+hold on;
+plot(ramp_angles1, max_toPlot2,'LineWidth',1)
+plot(ramp_angles2, max_toPlot3,'LineWidth',1)
+
 
 [ptot_ratio, linear_idx] = max(ptot_grid(:), [], 'omitnan');
 [id1, id2, id3] = ind2sub(size(ptot_grid), linear_idx);
