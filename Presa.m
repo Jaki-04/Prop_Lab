@@ -1,4 +1,4 @@
-%function [pf, Tf, rhof, Mf, Af] = Presa(varargin)
+function [pf, Tf, rhof, Mf, Af] = Presa(varargin)
 % %% Ottimizzazione della spina supersonica
 % 
 Air = Air_parameters('25000');
