@@ -16,9 +16,9 @@ options = optimoptions('fsolve','Display','none');
 options2 = optimoptions('fminunc','Display','none');
 
 % Angoli del cono e i due angoli di rampa su cui ciclare
-cone_angles = deg2rad(11:0.1:12);
-ramp_angles1 = deg2rad(14:0.1:15);
-ramp_angles2 = deg2rad(17:0.1:18);
+cone_angles = deg2rad(11:0.02:12);
+ramp_angles1 = deg2rad(14:0.02:15);
+ramp_angles2 = deg2rad(17:0.02:18);
 
 % Inizializzazione parametri
 ptot_grid = zeros(length(cone_angles), length(ramp_angles1), length(ramp_angles1));
@@ -126,12 +126,50 @@ end
 for id3 = 1:length(cone_angles)
         max_toPlot3(id3) = max(max(ptot_grid(:, :, id3)));
 end
-figure()
-plot(cone_angles, max_toPlot1,'LineWidth',1)
-hold on;
-plot(ramp_angles1, max_toPlot2,'LineWidth',1)
-plot(ramp_angles2, max_toPlot3,'LineWidth',1)
 
+%PLOT DELLA PRESSIONE AL VARIARE DEGLI ANGOLI DI RAMPA
+    % [max1, id1] = max(max_toPlot1);
+    % [max2, id2] = max(max_toPlot2);
+    % [max3, id3] = max(max_toPlot3);
+    % figure()
+    % tlrampa =tiledlayout(1,3,'TileSpacing','loose');
+    % title(tlrampa,"" );
+    % %plot spostamento x
+    % nexttile
+    % plot(rad2deg(cone_angles), max_toPlot1,'LineWidth',1, 'Color','blue', 'LineWidth',1)
+    % hold on;
+    % plot(rad2deg(cone_angles(id1)), max1, 'o', 'Color','k');
+    % plot(rad2deg(cone_angles(1:id1)), max1*ones(size(ramp_angles1(1:id1))), 'LineStyle','--', 'LineWidth',0.5, 'Color', 'k');
+    % pbaspect([1,1,1]);
+    % ylabel('$P_{tot}$ [Pa]', 'Interpreter','latex')
+    % xlabel('Angolo della prima rampa [deg]', 'Interpreter','latex')
+    % grid on;
+    % text(rad2deg(cone_angles(2)), max2 - 0.000025, '0.73107');
+    % ylim([0.7304, 0.7311])
+    % 
+    % nexttile
+    % plot(rad2deg(ramp_angles1), max_toPlot2,'LineWidth',1, 'Color','#FF8800', 'LineWidth',1)
+    % hold on;
+    % plot(rad2deg(ramp_angles1(id2)), max2, 'o', 'Color','k');
+    % plot(rad2deg(ramp_angles1(1:id2)), max2*ones(size(ramp_angles1(1:id2))), 'LineStyle','--', 'LineWidth',0.5, 'Color', 'k');
+    % pbaspect([1,1,1])
+    % ylabel('$P_{tot}$ [Pa]', 'Interpreter','latex')
+    % xlabel('Angolo della seconda rampa [deg]', 'Interpreter','latex')
+    % text(rad2deg(ramp_angles1(2)), max2 - 0.000025, '0.73107');
+    % grid on;
+    % ylim([0.7304, 0.7311])
+    % 
+    % nexttile
+    % plot(rad2deg(ramp_angles2), max_toPlot3,'LineWidth',1, 'Color','red', 'LineWidth',1)
+    % hold on;
+    % plot(rad2deg(ramp_angles2(id3)), max3, 'o', 'Color', 'k');
+    % plot(rad2deg(ramp_angles2(1:id3)), max3*ones(size(ramp_angles1(1:id3))), 'LineStyle','--', 'LineWidth',0.5, 'Color', 'k');
+    % pbaspect([1,1,1])
+    % ylabel('$P_{tot}$ [Pa]', 'Interpreter','latex')
+    % xlabel('Angolo della terza rampa [deg]', 'Interpreter','latex')
+    % text(rad2deg(ramp_angles2(2)), max2 - 0.000025, '0.73107');
+    % grid on;
+    % ylim([0.7304, 0.7311])
 
 [ptot_ratio, linear_idx] = max(ptot_grid(:), [], 'omitnan');
 [id1, id2, id3] = ind2sub(size(ptot_grid), linear_idx);
@@ -274,4 +312,4 @@ else
     Mf = M2_sub;
     Af = A2_sub;
 end
-
+end
