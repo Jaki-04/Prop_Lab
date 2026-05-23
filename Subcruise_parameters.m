@@ -28,7 +28,7 @@ cp_GC=Air.cp_GC;
 g_GC =Air.g_GC;
 
 % Parametri: beta e temperatura di ingresso in turbina
-Ttot3=(1100:10:1700);
+Ttot3=(1100:10:1897);
 b=(2:0.05:40);
 
 Tt3mat = Ttot3'*ones(1, max(size(b)));
@@ -57,7 +57,9 @@ ptot_diff = pi_d*ptot2;
 % C.C.
 ptot3=pi_b.*ptot_diff;
 SOT = Tt3mat.*2./(g_GC+1);
-eps_cool = (9/500 * (SOT-1100))/100 * 2;     % Spillamento per raffreddare la turbina (preso dal grafico)
+eps_cool_NGV = ((10/550 * (SOT-1100))/100).*(SOT>1100) ;     % Spillamento per raffreddare la turbina (preso dal grafico)
+eps_cool_blades = (12/350 * (SOT-1250)/100).*(SOT>1250);
+eps_cool = eps_cool_NGV+eps_cool_blades;
 
 fmat = ((1-eps_cool).*cp_a.*Ttot2-Tt3mat.*cp_GC+eps_cool.*Ttot2.*cp_GC)./(Tt3mat.*cp_GC-H_f.*eta_b);
 
@@ -91,7 +93,8 @@ for i=1:size(I_sp_a, 1)
 end
 
 maxValue = max(max(I_sp_a));
-[ind12, ind22] = find(I_sp_a==maxValue);
+[ind11, ind12] = find(I_sp_a==maxValue);
+
 if ismember('plot', varargin)
     figure()
     contourf(Ttot3, b, TSFC'*3600*1000, 10, "FaceAlpha",0.75);
@@ -99,27 +102,41 @@ if ismember('plot', varargin)
     c = colorbar;
     c.Label.String = "$TSFC\, \left[\, \frac{Kg}{kN\,h} \,\right]$";
     c.Label.Interpreter = 'latex';
+     xline(1250*(g_GC+1)/2, 'k--', 'LineWidth', 1)
+     xline(1100*(g_GC+1)/2, 'k--', 'LineWidth', 1)
     ylabel("$\beta_c$", 'Interpreter','latex')
     figure()
     bImax=zeros(size(Ttot3));
+    I_sp_a_curve=zeros(size(Ttot3));
     for temp=1:length(Ttot3)
         [Tmaxb, idmax] = max(I_sp_a(temp, :));
         bImax(temp) = b(idmax);
+        I_sp_a_curve(temp) = I_sp_a(temp, idmax);
     end
+
+    [target, Tind] = min(abs(I_sp_a_curve-0.95*maxValue));
+    bind=find(b==bImax(Tind));
     contourf(Ttot3, b, I_sp_a',11,"FaceAlpha",0.75);
      xlabel("$T_{tot, 4}\,[K]$", 'Interpreter','latex')
     c = colorbar;
-    c.Label.String = "$I_{sp,a}\,[s]$";
+    c.Label.String = "$I_{sp,a}\,\left[\frac{m}{s}\right]$";
     c.Label.Interpreter = 'latex';
     ylabel("$\beta_c$", 'Interpreter','latex')
     hold on
     plot(Ttot3, bImax, '--r', 'LineWidth', 1.5)
-    legend("","$\max_{\beta_c}[I_{sp,a}]$", 'Interpreter','latex')
+    plot(Ttot3(Tind), b(bind), 'or', 'MarkerSize', 5, 'MarkerFaceColor', 'r')
+    text(Ttot3(Tind), b(bind), "C", 'VerticalAlignment', 'bottom', 'HorizontalAlignment', 'right', 'Interpreter','latex', 'Color', 'r', 'FontSize', 12);
+    xline(1250*(g_GC+1)/2, 'k--', 'LineWidth', 1)
+    xline(1100*(g_GC+1)/2, 'k--', 'LineWidth', 1)
+    plot(Ttot3(ind11), b(ind12), 'sr', 'MarkerSize', 6, 'MarkerFaceColor', 'r')
+    text(Ttot3(ind11), b(ind12), "M", 'VerticalAlignment', 'bottom', 'HorizontalAlignment', 'right', 'Interpreter','latex', 'Color', 'r', 'FontSize', 12);
+    legend("","$max\,(\,I_{sp,a}\,)$", "Condizione di progetto","","", "Massimo Impulso", 'Interpreter','latex')
 end
-subCruise.m_a = T_subsonic/I_sp_a(ind12, ind22);
-subCruise.f=fmat(ind12, ind22);
-subCruise.b=bmat(ind12, ind22);
-subCruise.I_sp_a=I_sp_a(ind12, ind22);
-subCruise.TSFC=TSFC(ind12, ind22);
+maxValue
+subCruise.m_a = T_subsonic/I_sp_a(Tind, bind);
+subCruise.f=fmat(Tind, bind);
+subCruise.b=bmat(Tind, bind);
+subCruise.I_sp_a=I_sp_a(Tind, bind);
+subCruise.TSFC=TSFC(Tind, bind);
 subCruise.M=M_subsonic;
 subCruise.v0=v0_subsonic;
