@@ -94,6 +94,15 @@ end
 
 maxValue = max(max(I_sp_a));
 [ind11, ind12] = find(I_sp_a==maxValue);
+bImax=zeros(size(Ttot3));
+I_sp_a_curve=zeros(size(Ttot3));
+for temp=1:length(Ttot3)
+    [Tmaxb, idmax] = max(I_sp_a(temp, :));
+    bImax(temp) = b(idmax);
+    I_sp_a_curve(temp) = I_sp_a(temp, idmax);
+end
+[target, Tind] = min(abs(I_sp_a_curve-0.95*maxValue));
+bind=find(b==bImax(Tind));
 
 if ismember('plot', varargin)
     figure()
@@ -106,16 +115,7 @@ if ismember('plot', varargin)
      xline(1100*(g_GC+1)/2, 'k--', 'LineWidth', 1)
     ylabel("$\beta_c$", 'Interpreter','latex')
     figure()
-    bImax=zeros(size(Ttot3));
-    I_sp_a_curve=zeros(size(Ttot3));
-    for temp=1:length(Ttot3)
-        [Tmaxb, idmax] = max(I_sp_a(temp, :));
-        bImax(temp) = b(idmax);
-        I_sp_a_curve(temp) = I_sp_a(temp, idmax);
-    end
-
-    [target, Tind] = min(abs(I_sp_a_curve-0.95*maxValue));
-    bind=find(b==bImax(Tind));
+    
     contourf(Ttot3, b, I_sp_a',11,"FaceAlpha",0.75);
      xlabel("$T_{tot, 4}\,[K]$", 'Interpreter','latex')
     c = colorbar;
@@ -132,7 +132,7 @@ if ismember('plot', varargin)
     text(Ttot3(ind11), b(ind12), "M", 'VerticalAlignment', 'bottom', 'HorizontalAlignment', 'right', 'Interpreter','latex', 'Color', 'r', 'FontSize', 12);
     legend("","$max\,(\,I_{sp,a}\,)$", "Condizione di progetto","","", "Massimo Impulso", 'Interpreter','latex')
 end
-maxValue
+
 subCruise.m_a = T_subsonic/I_sp_a(Tind, bind);
 subCruise.f=fmat(Tind, bind);
 subCruise.b=bmat(Tind, bind);
