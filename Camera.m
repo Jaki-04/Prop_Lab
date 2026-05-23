@@ -7,7 +7,7 @@ f = S.f;
 options = optimoptions('fsolve','Display','none');
 [ptot_In, Ttot_In, MIn, AIn] = Compressore();
 
-%% Diffusore prima della camera
+% Diffusore prima della camera
 
 G = Geometry();
 rIn = G.Rc_he;
@@ -35,7 +35,7 @@ teta = deg2rad(4);
 L_diff_cc = deltar/sin(teta);
 WLratio_diff = L_diff_cc/(RIn-rIn);
 
-%% Camera di combustione
+% Camera di combustione
 eps_cool = 0.05;            % Spillamento di progetto
 H_f = 43*10^6;
 eta_b = 0.98;
@@ -58,3 +58,20 @@ MOut = 0.5;     % Mach in ingresso alla turbina
 n = 1.8;                                                           % Esponente per l'efficienza cinetica (citare qualche paper)
 Vcc = (H_f*f*m_a*(1-eps_cool)*eta_b)/(I*(p_Out_diff/10^5)^n);    % Equazione di Lefevre per l'intensità di combustione
 Lcc = Vcc/(2*pi*rm*href);                                        % Stima della lunghezza della camera
+
+% Perdite di pressione Camera 
+DP_qref = 20;
+DP_P = 0.06;
+
+p_In = ptot_In / (1 + (g_a-1)/2 * MIn^2)^(g_a/(g_a-1)); % Pressione in ingresso diffusore 
+T_In = Ttot_In / (1 + (g_a-1)/2 * MIn^2); % Temperatura ingresso diffusore
+rho_In = p_In / (R_a * T_In); % Densità ingresso diffusore
+
+U_ref = m_a/(rho_In*Aref); % Velocità di riferimento 
+q_ref = 0.5*rho_In*U_ref^2; % QdM di riferimento 
+M_ref = U_ref/(g_a*R_a*T_In)^0.5; % Mach di riferimento
+Dp_cold = 0.06 * p_In;
+Dp_hot = q_ref * (T_Out_cc/T_In-1);
+p_Out_cc = p_In - Dp_cold - Dp_hot;
+Dp_cold_verifica = DP_qref 0.5*R_a((m_a*T_In^0.5)/(Aref*p_In))^2*p_In;
+end

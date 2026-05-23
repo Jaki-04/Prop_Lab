@@ -12,17 +12,17 @@ f = supCruise.f;
 
 % da presa.m
 Ttot1 = 747.4425;
-v2 = 267.4095;
-A2 = 1.5147;
-r_t5 = 0.45; %numero a caso da calcolare poi
+v2 = 136.1677;
+A2 = 1.6075;
+r_t5 = 0.45;     %numero a caso da calcolare poi
 L_H_ratio = 3.2; %arbitrario
-B = 0.28; %arbitrario
+B = 0.28;        %arbitrario
 
 % Parametri termodinamici
 cp_a = Air.cp;              % Calore specifico aria [J/kgK]
 cp_GC = Air.cp_GC;          % Calore specifico gas combusti [J/kgK]
 H_f = 43000000;             % Potere calorifico [J/kg]
-eta_AB = 0.92;              % Rendimento post-combustore
+eta_AB = 0.98;              % Rendimento post-combustore
 
 % Temperatura totale all'uscita
 T_t7 = (cp_a * Ttot1 + f * H_f * eta_AB) / ((1 + f) * cp_GC);

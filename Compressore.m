@@ -56,10 +56,12 @@ gR = zeros(1, 10);
 Dr = zeros(1, 10);
 Ds = zeros(1, 10);
 
-while beta_real<beta
+gamma_vec = zeros(10, 1);
 
+while beta_real<beta
+    N_stadi = N_stadi+1;
     r_h_stadio = sqrt(r_t^2-A_In_stadio/pi);
-    r_hub(N_stadi+1) = r_h_stadio; 
+    r_hub(N_stadi) = r_h_stadio; 
     
     % Triangolo di velocità per lo stadio corrente
     r_pitch_stadio = (r_t+r_h_stadio)/2;
@@ -67,6 +69,7 @@ while beta_real<beta
     W1 = sqrt(U_pitch_stadio.^2 + C_z1.^2);
     W2 = 0.72*W1;
     gamma = asin(C_z1/W2);
+    gamma_vec(N_stadi) = pi/2 - gamma;
     C2 = sqrt(W2^2+U_pitch_stadio^2-2*U_pitch_stadio*W2*cos(gamma));
     Cteta2 = sqrt(C2^2-C_z1^2);
     
@@ -95,49 +98,48 @@ while beta_real<beta
     
     Dcoeff_r_stadio = @(sigma_r) 1-W2/W1+Cteta2/(2*sigma_r*W1);
     sigma_r = fsolve(@(sigma_r) Dcoeff_r_stadio(sigma_r) -0.55, 1, options);      % Impongo D=0.55 e trovo sigma_r
-    Dr(N_stadi+1) = sigma_r;
+    Dr(N_stadi) = sigma_r;
     Dcoeff_s_stadio = @(sigma_s) 1-C_z1/C2+Cteta2/(2*sigma_s*C2);
     sigma_s = fsolve(@(sigma_s) Dcoeff_s_stadio(sigma_s) -0.55, 1, options);      % Impongo D=0.55 e trovo sigma_s
-    Ds(N_stadi+1) = sigma_s;
+    Ds(N_stadi) = sigma_s;
     
     % Grado di reazione
     R_c_stadio = 1-Cteta2/(2*U_pitch_stadio);
-    gR(N_stadi+1) = R_c_stadio;
+    gR(N_stadi) = R_c_stadio;
     
     % Corda rotore e statore fissando il Re minimo
     nu1 = 4.67*10^-5;
     
     cr_stadio = 300000*nu1/W1;
-    cord_r(N_stadi+1) = cr_stadio;
+    cord_r(N_stadi) = cr_stadio;
     
     cs_stadio = 300000*nu1/C2;
-    cord_s(N_stadi+1) = cs_stadio;
+    cord_s(N_stadi) = cs_stadio;
     
     % Spaziatura pale rotore e statore usando i sigma dati
     
     sr_stadio = cr_stadio/sigma_r;
-    spacing_r(N_stadi+1) = sr_stadio;
+    spacing_r(N_stadi) = sr_stadio;
     
     ss_stadio = cs_stadio/sigma_s;
-    spacing_s(N_stadi+1) = ss_stadio;
+    spacing_s(N_stadi) = ss_stadio;
 
     % Lunghezza approssimativa dello stadio 
     l_r = cr_stadio*cos(pi/2-gamma);                                                % Corda inclinata uguale a W2;
     l_s = cs_stadio/2*sin(atan(C_z1/(U_pitch_stadio-W2*cos(gamma))))+cs_stadio/2;   % Corda metà inclinata come C2 e metà orizzontale
-    stage_space(N_stadi+1) = cs_stadio*0.35;      % https://journals.sagepub.com/doi/10.1177/0957650914531949
-    l_stadio(N_stadi+1) = (l_s+l_r+stage_space(N_stadi+1));        
+    stage_space(N_stadi) = cs_stadio*0.35;      % https://journals.sagepub.com/doi/10.1177/0957650914531949
+    l_stadio(N_stadi) = (l_s+l_r+stage_space(N_stadi));        
      
     % Numero di pale
     
     Nr_stadio = (2*pi*r_pitch_stadio)/sr_stadio;
-    bladeN_r(N_stadi+1) = ceil(Nr_stadio);
+    bladeN_r(N_stadi) = ceil(Nr_stadio);
     
     Ns_stadio = (2*pi*r_pitch_stadio)/ss_stadio;
-    bladeN_s(N_stadi+1) = ceil(Ns_stadio);
+    bladeN_s(N_stadi) = ceil(Ns_stadio);
     
     % Aggiorno beta_real
     beta_real = beta_real*b_stadio;
-    N_stadi = N_stadi +1;
 
     % Aggiorno quantità in ingresso allo stadio successivo
     A_In_stadio = A_Out_stadio;
@@ -146,6 +148,11 @@ while beta_real<beta
     M_In_stadio = M_Out_stadio;
     
 end
+
+%svergolamento palette
+Inc = atan((omega*r_pitch1)/C_z1) - gamma_vec(1);
+gamma_sverg = @(r) Inc - atan((omega*r)/C_z1);
+
 
 p_tOut = p_tIn_stadio;
 M_Out = M_In_stadio;
