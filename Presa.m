@@ -16,9 +16,9 @@ options = optimoptions('fsolve','Display','none');
 options2 = optimoptions('fminunc','Display','none');
 
 % Angoli del cono e i due angoli di rampa su cui ciclare
-cone_angles = deg2rad(11:0.02:12);
-ramp_angles1 = deg2rad(14:0.02:15);
-ramp_angles2 = deg2rad(17:0.02:18);
+cone_angles = deg2rad(11:0.1:12);
+ramp_angles1 = deg2rad(14:0.1:15);
+ramp_angles2 = deg2rad(17:0.1:18);
 
 % Inizializzazione parametri
 ptot_grid = zeros(length(cone_angles), length(ramp_angles1), length(ramp_angles1));
@@ -194,7 +194,7 @@ a3 = alpha3_grid(id1, id2, id3);
 %     ylabel('Ramp angles')
 %     zlabel('$\pi_d$', 'Interpreter','latex')
 
-sprintf('Rendimento massimo della presa pi_d=%f con valori %f° %f° %f°', ptot_ratio, rad2deg(delta1), rad2deg(delta2), rad2deg(delta3))
+%sprintf('Rendimento massimo della presa pi_d=%f con valori %f° %f° %f°', ptot_ratio, rad2deg(delta1), rad2deg(delta2), rad2deg(delta3))
 
 %% Calcolo dimensioni della spina
 
