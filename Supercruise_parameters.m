@@ -3,7 +3,7 @@
 function supCruise = Supercruise_parameters(varargin)
 
 % Rendimenti e parametri
-pi_AB = 0.95;       % Fissato
+pi_AB = 0.97;       % Fissato
 pi_d_sup = 0.73;     % Fissato (presa obiettivo)
 eta_AB=0.98;
 eta_n = 0.98;
@@ -51,7 +51,7 @@ rhoe = pe./(R_GC*Te);
 I_sp_a = ((1+f).*ve-v0_supercruise);
 TSFC=(f./I_sp_a)*1000*3600;
 TSFCmax = 24000*3600/((5000/1.0327)*65);
-D_e = 2*sqrt((65000./I_sp_a)./(rhoe.*ve*pi));
+%D_e = 2*sqrt((65000./I_sp_a)./(rhoe.*ve*pi));
 
 TSFC(I_sp_a <= 0) = NaN;
 TSFC(f <= 0) = NaN;
@@ -62,33 +62,38 @@ for i = 1:length(Ttot2)
     end
 end
 
-[TSFC_min, F_min] = min(TSFC);
+[TSFC_min, T_min] = min(TSFC);
 
-if ismember('plot', varargin)
-    figure()
-    plot(Ttot2, TSFC, 'LineWidth', 1);
-    hold on;
-    %yline(TSFC_min, '--k');
-    xline(2100, 'Color', 'r', 'LineStyle','--')
-    yline(TSFCmax, 'Color', 'r', 'LineStyle','-.')
-    plot(700, TSFCmax, '>', 'LineWidth', 1, 'Color', 'r')
-    ylim([180, 290])
-    xlim([700, 2200])
-    plot(2100, 180, '^', 'LineWidth', 1, 'Color', 'r')
-    plot(Ttot2(F_min), TSFC_min, 'o', 'MarkerFaceColor', 'b', 'MarkerEdgeColor','b', 'MarkerSize', 5);
-    lgd = legend("$TSFC$", "$T_{AB, max}$","$TSFC_{max}$", "", "", "$TSFC_{min}$", 'Interpreter','latex');
-    lgd.FontSize = 8;
-    lgd.IconColumnWidth = 18;
-    xlabel("$T_{tot, 2}\,[K]$", "Interpreter","latex");
-    ylabel("$TSFC \,\,\left[ \,\frac{kg}{kN\,h} \,\right] $", "Interpreter","latex")
-    grid on
+% if ismember('plot', varargin)
+%     figure()
+%     plot(Ttot2, TSFC, 'LineWidth', 1);
+%     hold on;
+%     %yline(TSFC_min, '--k');
+%     xline(2100, 'Color', 'r', 'LineStyle','--')
+%     yline(TSFCmax, 'Color', 'r', 'LineStyle','-.')
+%     plot(700, TSFCmax, '>', 'LineWidth', 1, 'Color', 'r')
+%     ylim([180, 290])
+%     xlim([700, 2200])
+%     plot(2100, 180, '^', 'LineWidth', 1, 'Color', 'r')
+%     plot(Ttot2(T_min), TSFC_min, 'o', 'MarkerFaceColor', 'b', 'MarkerEdgeColor','b', 'MarkerSize', 5);
+%     lgd = legend("$TSFC$", "$T_{AB, max}$","$TSFC_{max}$", "", "", "$TSFC_{min}$", 'Interpreter','latex');
+%     lgd.FontSize = 8;
+%     lgd.IconColumnWidth = 18;
+%     xlabel("$T_{tot, 2}\,[K]$", "Interpreter","latex");
+%     ylabel("$TSFC \,\,\left[ \,\frac{kg}{kN\,h} \,\right] $", "Interpreter","latex")
+%     grid on
+% 
+% end
 
-end
 
-supCruise.m_a=T_supercruise/I_sp_a(F_min);
-supCruise.f = f(F_min);
-supCruise.I_sp_a=I_sp_a(F_min);
-supCruise.TSFC=TSFC(F_min);
+[mod, Tind] = min(abs(TSFC(T_min:end)-1.025*TSFC_min));
+Tind=T_min+Tind;
+T_target = Ttot2(Tind);
+
+supCruise.m_a=T_supercruise/I_sp_a(Tind);
+supCruise.f = f(Tind);
+supCruise.I_sp_a=I_sp_a(Tind);
+supCruise.TSFC=TSFC(Tind);
 supCruise.M=M_supercruise;
 supCruise.v0=v0_supercruise;
 
