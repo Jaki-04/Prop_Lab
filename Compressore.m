@@ -1,6 +1,6 @@
 %% Dimensionamento del compressore  (ford Kompressor)
 
-%function [p_tOut, T_tOut, M_Out, A_Out_Comp, L_compressore] = Compressore()
+function [p_tOut, T_tOut, M_Out, A_Out_Comp, L_compressore] = Compressore()
 Air = Air_parameters();
 R = Air.R;
 g = Air.g;

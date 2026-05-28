@@ -73,5 +73,5 @@ M_ref = U_ref/(g_a*R_a*T_In)^0.5; % Mach di riferimento
 Dp_cold = 0.06 * p_In;
 Dp_hot = q_ref * (T_Out_cc/T_In-1);
 p_Out_cc = p_In - Dp_cold - Dp_hot;
-Dp_cold_verifica = DP_qref 0.5*R_a((m_a*T_In^0.5)/(Aref*p_In))^2*p_In;
+Dp_cold_verifica = DP_qref+0.5*R_a*((m_a*T_In^0.5)/(Aref*p_In))^2*p_In;
 end
