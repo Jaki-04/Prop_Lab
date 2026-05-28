@@ -1,6 +1,6 @@
 %% Dimensionamento del compressore  (ford Kompressor)
 
-function [p_tOut, T_tOut, M_Out, A_Out_Comp, L_compressore] = Compressore()
+%function [p_tOut, T_tOut, M_Out, A_Out_Comp, L_compressore] = Compressore()
 Air = Air_parameters();
 R = Air.R;
 g = Air.g;
@@ -78,9 +78,9 @@ while beta_real<beta
 
     % Temperatura totale in uscita
     T_tIn_stadio = T_In_stadio*(1+M_In_stadio^2*(g-1)/2);
-    T_Out_stadio = L_stadio/cp + T_In_stadio;
+    T_tOut_stadio = L_stadio/cp + T_tIn_stadio;
+    T_Out_stadio = T_tOut_stadio - C_z1^2/(2*cp);
     M_Out_stadio = C_z1 / sqrt(g * R * T_Out_stadio); 
-    T_tOut_stadio = T_Out_stadio*(1+M_Out_stadio^2*(g-1)/2);
 
     % Rapporto di compressione ottenuto (con rendimento)
     b_stadio = (T_tOut_stadio/T_tIn_stadio)^( 1/((g-1)/(eta_poli*g)) );
