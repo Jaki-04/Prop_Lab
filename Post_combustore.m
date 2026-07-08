@@ -23,7 +23,7 @@ pi_AB = 0.97;
 
 Ttot1 = T_i*(1+M_i^2*(g_a-1)/2);
 ptot1 = p_i*(1+M_i^2*(g_a-1)/2)^(g_a/(g_a-1));
-r_t5 = 0.492;     % Raggio tip in turbina (dovrebbe essere giusto)
+r_t5 = 0.4919;        % Raggio tip in turbina
 L_H_ratio = 3;        %arbitrario
 dhratio = 0.3;        %arbitrario
 
@@ -34,7 +34,7 @@ Tf = T_t7/(1+M_i^2*(g_GC-1)/2);
 pf = p_t7 / ((1+M_i^2*(g_GC-1)/2)^(g_GC/(g_GC-1)));
 rhof = pf/(R_GC*Tf);
 
-% dimensioni post bruciatore
+% dimensioni post combustore
 r_ram = sqrt((A_i / pi) + r_t5^2);
 A_ram = pi * r_ram^2;
 H_ram = 2 * r_ram;
