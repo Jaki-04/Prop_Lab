@@ -271,14 +271,14 @@ ptot1_sub = p_sub*(1+M_sub^2*(g-1)/2)^(g/(g-1));
 
 % Sezione di ingresso subsonica
 Ain_sub = m_a_sub/(rho_sub*v0_sub);
-rmax_spina = sqrt(R_in^2-Ain_sub/pi);
-h0_d_sub = R_in-rmax_spina;
-phi_inf = deg2rad(10); 
+phi_inf = deg2rad(7); 
 
 G = Geometry();
 rt_c = G.Rc_t;           % Dati dal compressore
 rh_c = G.Rc_h1;           % Dati dal compressore
 
+rmax_spina = sqrt(rt_c^2-Ain_sub/pi);
+h0_d_sub = R_in-rmax_spina;
 deltar_inf = rmax_spina-rh_c;
 deltar_sup = rt_c-R_in;
 L_diff = deltar_inf/tan(phi_inf);
