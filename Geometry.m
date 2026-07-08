@@ -25,9 +25,9 @@ function Parameters = Geometry()
     Parameters.L_sub = 0.760218794189371;           % Distanza orizzontale tra il cowl lip e il compressore
 
 % Compressore
-    Parameters.Rc_h1 = 0.258017976310025;       % Raggio iniziale dell'hub del compressore
-    Parameters.Rc_t = 0.516035952620051;        % Raggio tip del compressore
-    Parameters.Rc_he = 0.480892669586198;       % Raggio finale dell'hub del compressore
+    Parameters.Rc_h1 = 0.2434;                  % Raggio iniziale dell'hub del compressore
+    Parameters.Rc_t = 0.4869;                   % Raggio tip del compressore
+    Parameters.Rc_he = 0.4537;       % Raggio finale dell'hub del compressore
     Parameters.L_comp = 1.033595957996741;      % Lunghezza del compressore
 
 % Camera di combustione
