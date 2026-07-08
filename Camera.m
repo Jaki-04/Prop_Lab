@@ -58,8 +58,8 @@ Aref = ((R_a/2) * (m_a * T_In^0.5 / p_Out_diff)^2 * DP_qref * DP_P^-1)^0.5;
 rm = (ROut_diff+rOut_diff)/2;
 href = Aref/(2*pi*rm);
 n = 1.8;                                                           % Esponente per l'efficienza cinetica (citare qualche paper)
-Vcc = (H_f*f*m_a*(1-eps_cool)*eta_b)/(I*(ptot_In/10^5)^n);    % Equazione di Lefebvre per l'intensità di combustione
-Lcc = Vcc/(2*pi*rm*href);                                        % Stima della lunghezza della camera
+Vcc = (H_f*f*m_a*(1-eps_cool)*eta_b)/(I*(p_Out_diff/10^5)^n);    % Equazione di Lefebvre per l'intensità di combustione
+Lcc = Vcc/(2*pi*rm*href);                                       % Stima della lunghezza della camera
 
 % Perdite di pressione Camera 
 DP_qref = 20;
@@ -74,6 +74,6 @@ M_ref = U_ref/(g_a*R_a*T_In)^0.5; % Mach di riferimento
 Dp_cold = 0.06 * ptot_In;
 Dp_hot = q_ref * (T_Out_cc/T_In-1);
 ptot_Out_cc = ptot_In - Dp_cold - Dp_hot;
-p_Out_cc = ptot_Out_cc/(1+MIn^2*(g_a-1)/2)^(g_a/(g_a-1));
+p_Out_cc = ptot_Out_cc/(1+MOut^2*(g_a-1)/2)^(g_a/(g_a-1));
 
 % Dp_cold_verifica = DP_qref+0.5*R_a*((m_a*T_In^0.5)/(Aref*p_In))^2*p_In;
