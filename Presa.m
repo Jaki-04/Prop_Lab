@@ -16,9 +16,9 @@ options = optimoptions('fsolve','Display','none');
 options2 = optimoptions('fminunc','Display','none');
 
 % Angoli del cono e i due angoli di rampa su cui ciclare
-cone_angles = deg2rad(11:0.1:12);
-ramp_angles1 = deg2rad(14:0.1:15);
-ramp_angles2 = deg2rad(17:0.1:18);
+cone_angles = deg2rad(10:0.2:13);
+ramp_angles1 = deg2rad(13:0.2:16);
+ramp_angles2 = deg2rad(16:0.2:19);
 
 % Inizializzazione parametri
 ptot_grid = zeros(length(cone_angles), length(ramp_angles1), length(ramp_angles1));
@@ -127,6 +127,7 @@ for id3 = 1:length(cone_angles)
         max_toPlot3(id3) = max(max(ptot_grid(:, :, id3)));
 end
 
+
 %PLOT DELLA PRESSIONE AL VARIARE DEGLI ANGOLI DI RAMPA
     % [max1, id1] = max(max_toPlot1);
     % [max2, id2] = max(max_toPlot2);
@@ -195,6 +196,51 @@ a3 = alpha3_grid(id1, id2, id3);
 %     zlabel('$\pi_d$', 'Interpreter','latex')
 
 %sprintf('Rendimento massimo della presa pi_d=%f con valori %f° %f° %f°', ptot_ratio, rad2deg(delta1), rad2deg(delta2), rad2deg(delta3))
+
+% % ALTRO PLOT DEL RENDIMENTO
+% % 1. Genera la griglia 3D corretta per gli assi cartesiani (X=colonne, Y=righe, Z=profondità)
+% [X, Y, Z] = meshgrid(rad2deg(cone_angles), rad2deg(ramp_angles1), rad2deg(ramp_angles2));
+% V = ptot_grid;
+% 
+% % 2. Definisci il valore centrale e la tolleranza del range
+% %valore_centro = (0.731071+0.728733)/2; 
+% %tolleranza = (0.731071-0.728733)/2; % Se il grafico è vuoto, aumenta questo valore (es. 0.1 o 0.2)
+% 
+% valore_min = 0.73;
+% valore_max = 0.732;
+% 
+% % 3. Trova i punti nel range ed estrai le coordinate cartesiane
+% maschera = (V >= valore_min) & (V <= valore_max);
+% x_punti = X(maschera);
+% y_punti = Y(maschera);
+% z_punti = Z(maschera);
+% valori_punti = V(maschera);
+% 
+% % 4. Controllo di sicurezza e Plot
+% figure;
+% if isempty(x_punti)
+%     % Se non trova nulla, ti stampa a schermo i valori reali della tua matrice per capire dove sbatte
+%     fprintf('ERRORE: Nessun punto trovato tra %g e %g.\n', valore_min, valore_max);
+%     fprintf('I valori della tua ptot_grid vanno da un MIN di %g a un MAX di %g.\n', min(V(:)), max(V(:)));
+%     error('Allarga la tolleranza o cambia il valore_centro.');
+% else
+%     % Disegna i punti. 40 è la dimensione del pallino, cambiala se serve
+%     scatter3(x_punti, y_punti, z_punti, 20, valori_punti, 'filled', 'LineWidth',0.5);
+% end
+% 
+% % 5. Impostazioni grafiche e nomi degli assi corretti
+% view(3); 
+% grid on; 
+% axis tight;
+% colorbar; % Mostra la barra con i valori esatti di ptot_grid relativi ai punti
+% colormap('cool'); 
+% hold on;
+% plot3(11.8, 14.4, 17.7,'o', 'MarkerSize', 5, 'MarkerFaceColor','r')
+% text(11.8, 14.4, 17.7,'\textbf{MAX}', 'Color', 'r', 'Interpreter','latex', 'FontSize',11, 'VerticalAlignment', 'cap')
+% xlabel('$\delta_1$', 'Interpreter','latex'); 
+% ylabel('$\delta_2$', 'Interpreter','latex'); 
+% zlabel('$\delta_3$', 'Interpreter','latex');
+
 
 %% Calcolo dimensioni della spina
 
