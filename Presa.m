@@ -321,16 +321,12 @@ phi_inf = deg2rad(7);
 
 G = Geometry();
 rt_c = G.Rc_t;           % Dati dal compressore
-rh_c = G.Rc_h1;           % Dati dal compressore
+rh_c = G.Rc_h1;          % Dati dal compressore
 
-rmax_spina = sqrt(rt_c^2-Ain_sub/pi);
-h0_d_sub = R_in-rmax_spina;
-deltar_inf = rmax_spina-rh_c;
-deltar_sup = rt_c-R_in;
+rin_sub=sqrt(rt_c^2-Ain_sub/pi);
+deltar_inf=rin_sub-rh_c;
 L_diff = deltar_inf/tan(phi_inf);
-L_sub = L_diff+sin(acos(r_in/rmax_spina))*rmax_spina;
-phi_sup = atan(deltar_sup/L_diff);
-widthlength_ratio = L_diff/h0_d_sub;
+widthlength_ratio = L_diff/(rt_c-rin_sub);
 
 % Diffusore subsonico
 eta_diff_sub = 0.97;               
