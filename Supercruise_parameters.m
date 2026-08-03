@@ -6,7 +6,7 @@ function supCruise = Supercruise_parameters(varargin)
 pi_AB = 0.97;       % Fissato
 pi_d_sup = 0.73;     % Fissato (presa obiettivo)
 eta_AB=0.98;
-eta_n = 0.98;
+eta_n = 1;
 H_f=43000000;       % Fissato
 Tmax_AB = 2100;
 T_supercruise = 65000;
@@ -64,31 +64,68 @@ end
 
 [TSFC_min, T_min] = min(TSFC);
 
-% if ismember('plot', varargin)
-%     figure()
-%     plot(Ttot2, TSFC, 'LineWidth', 1);
-%     hold on;
-%     %yline(TSFC_min, '--k');
-%     xline(2100, 'Color', 'r', 'LineStyle','--')
-%     yline(TSFCmax, 'Color', 'r', 'LineStyle','-.')
-%     plot(700, TSFCmax, '>', 'LineWidth', 1, 'Color', 'r')
-%     ylim([180, 290])
-%     xlim([700, 2200])
-%     plot(2100, 180, '^', 'LineWidth', 1, 'Color', 'r')
-%     plot(Ttot2(T_min), TSFC_min, 'o', 'MarkerFaceColor', 'b', 'MarkerEdgeColor','b', 'MarkerSize', 5);
-%     lgd = legend("$TSFC$", "$T_{AB, max}$","$TSFC_{max}$", "", "", "$TSFC_{min}$", 'Interpreter','latex');
-%     lgd.FontSize = 8;
-%     lgd.IconColumnWidth = 18;
-%     xlabel("$T_{tot, 2}\,[K]$", "Interpreter","latex");
-%     ylabel("$TSFC \,\,\left[ \,\frac{kg}{kN\,h} \,\right] $", "Interpreter","latex")
-%     grid on
-% 
-% end
-
-
 [mod, Tind] = min(abs(TSFC(T_min:end)-1.025*TSFC_min));
 Tind=T_min+Tind;
-T_target = Ttot2(Tind);
+T_target = Ttot2(Tind)
+Ttot2(T_min)
+if ismember('plot', varargin)
+    figure()
+    plot(Ttot2, TSFC, 'LineWidth', 1.5, 'Color',[0.8500, 0.3250, 0.0980]);
+    hold on;
+    %yline(TSFC_min, '--k');
+    xline(2100, 'Color', 'r', 'LineStyle','--')
+    yline(TSFCmax, 'Color', 'r', 'LineStyle','-.')
+    plot(700, TSFCmax, '>', 'LineWidth', 1, 'Color', 'r')
+    ylim([180, 290])
+    xlim([700, 2200])
+    plot(2100, 180, '^', 'LineWidth', 1, 'Color', 'r')
+    plot(Ttot2(T_min), TSFC_min, 'o', 'MarkerFaceColor', [0.8500, 0.3250, 0.0980], 'MarkerEdgeColor',[0.8500, 0.3250, 0.0980], 'MarkerSize', 5)
+    text(Ttot2(T_min)-10, TSFC_min-3, 'm','FontSize',12,'FontWeight','bold','Color',[0.8500, 0.3250, 0.0980],'Interpreter','latex')
+    xlabel("$T_{tot, 7}\,[K]$", "Interpreter","latex");
+    ylabel("$TSFC \,\,\left[ \,\frac{kg}{kN\,h} \,\right] $", "Interpreter","latex")
+    plot(Ttot2(Tind), TSFC(Tind), 'o', 'MarkerFaceColor', [0.8500, 0.3250, 0.0980], 'MarkerEdgeColor',[0.8500, 0.3250, 0.0980], 'MarkerSize', 5)
+    text(Ttot2(Tind)-10, TSFC(Tind)-4, 'C', 'FontSize',12,'FontWeight','bold','Color',[0.8500, 0.3250, 0.0980],'Interpreter','latex')
+    grid on
+    
+    ax = gca;
+ax.TickLabelInterpreter = 'latex';
+
+% --- Asse X ---
+xt = xticks;                    % tick di default
+xt = unique([xt, 2100]);        % forza la presenza del tick a 2100
+xticks(xt);
+xtl = "$" + string(xt) + "$";                      % wrappa tutto in $...$
+xtl(abs(xt - 2100) < 1e-6) = "$T_{AB,\mathrm{max}}$";
+xticklabels(xtl);
+
+% --- Asse Y ---
+yt = yticks;
+yt = unique([yt, TSFCmax]);     % forza la presenza del tick a TSFCmax
+yticks(yt);
+ytl = "$" + string(yt) + "$";
+ytl(abs(yt - TSFCmax) < 1e-6) = "$TSFC_{\mathrm{max}}$";
+yticklabels(ytl);
+
+figure()
+plot(Ttot2, I_sp_a,'Linewidth', 1.5)
+xline(2100, 'Color', 'r', 'LineStyle','--')
+
+ax = gca;
+ax.TickLabelInterpreter = 'latex';
+% --- Asse X ---
+xt = xticks;                    % tick di default
+xt = unique([xt, 2100]);        % forza la presenza del tick a 2100
+xticks(xt);
+xtl = "$" + string(xt) + "$";                      % wrappa tutto in $...$
+xtl(abs(xt - 2100) < 1e-6) = "$T_{AB,\mathrm{max}}$";
+xticklabels(xtl);
+grid on
+hold on
+plot(2100, 0, '^', 'LineWidth', 1, 'Color', 'r')
+ylim([0,900])
+xlabel("$T_{tot, 7}\,[K]$", "Interpreter","latex");
+   ylabel("$I_{sp,a} \,\,\left[ \,\frac{m}{s} \,\right] $", "Interpreter","latex")
+end
 
 supCruise.m_a=T_supercruise/I_sp_a(Tind);
 supCruise.f = f(Tind);
