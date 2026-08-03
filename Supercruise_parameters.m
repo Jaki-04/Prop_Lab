@@ -66,8 +66,7 @@ end
 
 [mod, Tind] = min(abs(TSFC(T_min:end)-1.025*TSFC_min));
 Tind=T_min+Tind;
-T_target = Ttot2(Tind)
-Ttot2(T_min)
+
 if ismember('plot', varargin)
     figure()
     plot(Ttot2, TSFC, 'LineWidth', 1.5, 'Color',[0.8500, 0.3250, 0.0980]);
