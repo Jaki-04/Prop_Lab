@@ -23,9 +23,9 @@ pi_AB = 0.97;
 
 Ttot1 = T_i*(1+M_i^2*(g_a-1)/2);
 ptot1 = p_i*(1+M_i^2*(g_a-1)/2)^(g_a/(g_a-1));
-r_t5 = 0.4919;        % Raggio tip in turbina
-L_H_ratio = 3;        %arbitrario
-dhratio = 0.3;        %arbitrario
+r_t5 = 0.484;        % Raggio tip in turbina
+L_H_ratio = 2.2;        %arbitrario
+dhratio = 0.25;        %arbitrario
 
 % Temperatura totale all'uscita
 T_t7 = (cp_a * Ttot1 + f * H_f * eta_AB) / ((1 + f) * cp_GC);
@@ -35,14 +35,16 @@ pf = p_t7 / ((1+M_i^2*(g_GC-1)/2)^(g_GC/(g_GC-1)));
 rhof = pf/(R_GC*Tf);
 
 % dimensioni post combustore
+% Attenzione a cos'è A_i, r_ram al momento è calcolato sbagliato
 r_ram = sqrt((A_i / pi) + r_t5^2);
-A_ram = pi * r_ram^2;
-H_ram = 2 * r_ram;
-L_ram = L_H_ratio * H_ram;
 
-vf = m_a/(rhof*A_ram);
-Mf = vf/sqrt(g_GC*R_GC*Tf);
+r_AB = sqrt(A_i/pi);
+H_AB = 2 * r_AB;
+L_AB= L_H_ratio * H_AB;
 
-% dimensioni stabilizzatori di fiamma (ne metto 8)
-d_fh = dhratio * H_ram / 8;
+vf = m_a/(rhof*A_i);
+Mf = vf/sqrt(g_GC*R_GC*Tf)
+
+% dimensioni stabilizzatori di fiamma (ne metto 2)
+d_fh = dhratio * H_AB / (2*2)
 
