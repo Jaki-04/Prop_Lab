@@ -26,8 +26,8 @@ beta = S.b;                                             % Rapporto di compressio
 
 % Dimensionamento con primo stadio r_h1/r_t = 0.5
 a=0.5;
-r_t = sqrt(A_in_comp/(pi*(1-a^2)))
-r_h1 = r_t*a
+r_t = sqrt(A_in_comp/(pi*(1-a^2)));
+r_h1 = r_t*a;
 r_pitch1 = (r_t+r_h1)/2;
 
 % Omega necessarie ad avere Mrel=1 sulla pitchline del primo stadio
@@ -159,4 +159,3 @@ M_Out = M_In_stadio;
 T_tOut = T_In_stadio*(1+M_Out^2*(g-1)/2);
 A_Out_Comp = A_In_stadio;
 L_compressore= sum(l_stadio)+stage_space(end);
-gR
