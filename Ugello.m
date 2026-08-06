@@ -22,9 +22,6 @@ p_t7 = p_i*(1+M_i^2*(g_GC-1)/2)^(g_GC/(g_GC-1));
 T_t7 = T_i*(1+M_i^2*(g_GC-1)/2);
 H_ram = 2*sqrt(A_i/pi);
 
-eta_n = 1;
-soglia_n = 1.05;
-
 %% Ugello supersonico
 
 % Area di gola
@@ -34,44 +31,20 @@ Gamma = sqrt(g_GC) * (2 / (g_GC + 1))^((g_GC + 1) / (2 * (g_GC - 1)));
 % Dimensionamento della gola
 A_g = (m_tot * sqrt(R_GC * T_t7)) / (p_t7 * Gamma);
 
-% % Spinta ugello CD (espansione ottima)
- %v_e = sqrt(2 * cp_GC * T_t7 *0.95* (1 - (p0 / p_t7)^((g_GC-1)/g_GC)));
-
-% F_CD = m_tot * v_e;
-% 
-% % Spinta ugello Convergente (blocco sonico in gola)
-% % Condizioni critiche in gola
-% T_g = T_t7 * (2 / (g_GC + 1));
-% p_g = p_t7 * (2 / (g_GC + 1))^(g_GC / (g_GC - 1));
-% v_g = sqrt(g_GC * R_GC * T_g);
-% F_C = (m_tot * v_g) + A_g * (p_g - p0);
-% 
-% % Rapporto di Spinta al punto operativo
-% Ratio_F = F_CD / F_C;
-% 
-% if Ratio_F > soglia_n
-%     fprintf('Vantaggio del %.1f%% (> %.1f%%).\n', (Ratio_F-1)*100, (soglia_n-1)*100);
-%     disp('Ugello Convergente-Divergente richiesto.');
-% else
-%     fprintf('Vantaggio del %.1f%% (< %.1f%%).\n', (Ratio_F-1)*100, (soglia_n-1)*100);
-%     disp('Ugello Convergente sufficiente.');
-% end
-
 %% Ugello di de Laval supersonico
 
 % Espansione isentropica da condizioni TOTALI
-Te_ideal   = T_t7 * (p0 / p_t7)^((g_GC-1)/g_GC);
-v_e        = sqrt(2 * cp_GC * eta_n * (T_t7 - Te_ideal));
-
-% Temperatura reale all'uscita (non quella isentropica)
-T_e_actual = T_t7 - v_e^2 / (2 * cp_GC);
-M_e        = v_e / sqrt(g_GC * R_GC * T_e_actual);
+p_t9=p_t7;
+T_t9=T_t7;
+T9   = T_t9 * (p0 / p_t9)^((g_GC-1)/g_GC);
+v9        = sqrt(2 * cp_GC * (T_t9 - T9));
+M9        = v9 / sqrt(g_GC * R_GC * T9);
 
 % Spinta netta (corretta se p_e = p0)
-Effective_thrust = m_tot * v_e - m_a * v0;   
+Effective_thrust = m_tot * v9 - m_a * v0;   
 
 % Area di uscita
-ratio_A = (1 / M_e) * ( (2 / (g_GC + 1)) * (1 + ((g_GC - 1) / 2) * M_e^2) )...
+ratio_A = (1 / M9) * ( (2 / (g_GC + 1)) * (1 + ((g_GC - 1) / 2) * M9^2) )...
     ^((g_GC + 1) / (2 * (g_GC - 1)));
 A_e = A_g * ratio_A;
 D_g = 2 * sqrt(A_g / pi);
@@ -79,7 +52,7 @@ D_e = 2 * sqrt(A_e / pi);
 
 % Scelta degli angoli
 theta_c_deg = 45;
-theta_d_deg = 20;
+theta_d_deg = 25;
 
 % Conversione in radianti
 theta_c = deg2rad(theta_c_deg);
@@ -88,4 +61,4 @@ theta_d = deg2rad(theta_d_deg);
 % Calcolo delle lunghezze geometriche
 L_c = (H_ram - D_g) / (2 * tan(theta_c)); % Lunghezza del convergente
 L_d = (D_e - D_g) / (2 * tan(theta_d));   % Lunghezza del divergente
-L_tot = L_c + L_d;                        % Lunghezza totale dell'ugello
+L_tot = L_c + L_d                        % Lunghezza totale dell'ugello

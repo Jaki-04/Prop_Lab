@@ -1,4 +1,4 @@
-function [pf, Tf, Mf, A_ram] = Post_combustore()
+function [pf, Tf, Mf, A_AB] = Post_combustore()
 
 %% Dimensionamento post combustore
 
@@ -41,6 +41,7 @@ r_ram = sqrt((A_i / pi) + r_t5^2);
 r_AB = sqrt(A_i/pi);
 H_AB = 2 * r_AB;
 L_AB= L_H_ratio * H_AB;
+A_AB=r_AB^2*pi;
 
 vf = m_a/(rhof*A_i);
 Mf = vf/sqrt(g_GC*R_GC*Tf);
