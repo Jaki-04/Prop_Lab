@@ -22,7 +22,7 @@ p_t7 = p_i*(1+M_i^2*(g_GC-1)/2)^(g_GC/(g_GC-1));
 T_t7 = T_i*(1+M_i^2*(g_GC-1)/2);
 H_ram = 2*sqrt(A_i/pi);
 
-eta_n = 0.98;
+eta_n = 1;
 soglia_n = 1.05;
 
 %% Ugello supersonico
