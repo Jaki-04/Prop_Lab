@@ -36,20 +36,25 @@ A_g = (m_tot * sqrt(R_GC * T_t7)) / (p_t7 * Gamma);
 % Espansione isentropica da condizioni TOTALI
 p_t9=p_t7;
 T_t9=T_t7;
-T9   = T_t9 * (p0 / p_t9)^((g_GC-1)/g_GC);
-v9        = sqrt(2 * cp_GC * (T_t9 - T9));
-M9        = v9 / sqrt(g_GC * R_GC * T9);
+T9  = @(p) T_t9 * (p / p_t9)^((g_GC-1)/g_GC);
+v9  = @(p) sqrt(2 * cp_GC * (T_t9 - T9(p)));
+M9  = @(p) v9(p) / sqrt(g_GC * R_GC * T9(p));
+ratio_A = @(p) (1 / M9(p)) * ( (2 / (g_GC + 1)) * (1 + ((g_GC - 1) / 2) * M9(p)^2) )...
+    ^((g_GC + 1) / (2 * (g_GC - 1)));
+A_e = @(p) A_g * ratio_A(p);
 
 % Spinta netta (corretta se p_e = p0)
-Effective_thrust = m_tot * v9 - m_a * v0;   
+Effective_thrust = @(p) m_tot * v9(p) - m_a * v0 + (p-p0)*A_e(p);
+pe=fsolve(@(p) Effective_thrust(p) - 65000, 5000);
 
 % Area di uscita
-ratio_A = (1 / M9) * ( (2 / (g_GC + 1)) * (1 + ((g_GC - 1) / 2) * M9^2) )...
-    ^((g_GC + 1) / (2 * (g_GC - 1)));
-A_e = A_g * ratio_A;
+T9 = T9(pe);
+v9 = v9(pe);
+M9 = M9(pe);
+A_e = A_e(pe);
+
 D_g = 2 * sqrt(A_g / pi);
 D_e = 2 * sqrt(A_e / pi);
-
 % Scelta degli angoli
 theta_c_deg = 45;
 theta_d_deg = 25;
@@ -59,6 +64,6 @@ theta_c = deg2rad(theta_c_deg);
 theta_d = deg2rad(theta_d_deg);
 
 % Calcolo delle lunghezze geometriche
-L_c = (H_ram - D_g) / (2 * tan(theta_c)); % Lunghezza del convergente
-L_d = (D_e - D_g) / (2 * tan(theta_d));   % Lunghezza del divergente
+L_c = (H_ram - D_g) / (2 * tan(theta_c)) % Lunghezza del convergente
+L_d = (D_e - D_g) / (2 * tan(theta_d))   % Lunghezza del divergente
 L_tot = L_c + L_d                        % Lunghezza totale dell'ugello
