@@ -43,8 +43,8 @@ H_AB = 2 * r_AB;
 L_AB= L_H_ratio * H_AB;
 
 vf = m_a/(rhof*A_i);
-Mf = vf/sqrt(g_GC*R_GC*Tf)
+Mf = vf/sqrt(g_GC*R_GC*Tf);
 
 % dimensioni stabilizzatori di fiamma (ne metto 2)
-d_fh = dhratio * H_AB / (2*2)
+d_fh = dhratio * H_AB / (2*2);
 
