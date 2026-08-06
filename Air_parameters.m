@@ -3,7 +3,7 @@ function Air = Air_parameters(varargin)
 
 Air.cp_GC=1243;
 Air.g_GC=1.3;
-Air.R_GC=Air.cp_GC/3.5;
+Air.R_GC=Air.cp_GC * (Air.g_GC - 1) / Air.g_GC;
 
 Air.cp=1005;
 Air.g=1.4;
