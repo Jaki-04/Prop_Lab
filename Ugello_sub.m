@@ -1,3 +1,6 @@
+clear;
+clc;
+
 %% Dati
 
 Air = Air_parameters('12000');
@@ -32,19 +35,19 @@ A_g = (m_tot * sqrt(R_GC * T_t7)) / (p_t7 * Gamma);
 Te   = T_t7 * (p0 / p_t7)^((g_GC-1)/g_GC);
 v_e  = sqrt(2 * cp_GC * (T_t7 - Te));
 
-M_e  = v_e / sqrt(g_GC * R_GC * Te);
+M_e  = v_e / sqrt(g_GC * R_GC * Te)
 
 % Spinta netta (corretta se p_e = p0)
-Effective_thrust = m_tot * v_e - m_a * v0;
+Effective_thrust = m_tot * v_e - m_a * v0
 
-r_g=sqrt(A_g/pi);
+r_g=sqrt(A_g/pi)
 ratio_A = (1 / M_e) * ( (2 / (g_GC + 1)) * (1 + ((g_GC - 1) / 2) * M_e^2) )...
     ^((g_GC + 1) / (2 * (g_GC - 1)));
 A_e = A_g * ratio_A;
-r_e=sqrt(A_e/pi);
+r_e=sqrt(A_e/pi)
 a1=deg2rad(40);
 a2=deg2rad(15);
-r_AB = 0.5763;
-Lcon= (r_AB-r_g)/tan(a1);
-Ldiv = (r_e-r_g)/tan(a2);
-Ln=Lcon+Ldiv;
+r_AB = 0.5909;
+Lcon= (r_AB-r_g)/tan(a1)
+Ldiv = (r_e-r_g)/tan(a2)
+Ln=Lcon+Ldiv
