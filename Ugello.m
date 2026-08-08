@@ -57,13 +57,13 @@ D_g = 2 * sqrt(A_g / pi);
 D_e = 2 * sqrt(A_e / pi);
 % Scelta degli angoli
 theta_c_deg = 45;
-theta_d_deg = 25;
+theta_d_deg = 20;
 
 % Conversione in radianti
 theta_c = deg2rad(theta_c_deg);
 theta_d = deg2rad(theta_d_deg);
 
 % Calcolo delle lunghezze geometriche
-L_c = (H_ram - D_g) / (2 * tan(theta_c)) % Lunghezza del convergente
-L_d = (D_e - D_g) / (2 * tan(theta_d))   % Lunghezza del divergente
-L_tot = L_c + L_d                        % Lunghezza totale dell'ugello
+L_c = (H_ram - D_g) / (2 * tan(theta_c)); % Lunghezza del convergente
+L_d = (D_e - D_g) / (2 * tan(theta_d));   % Lunghezza del divergente
+L_tot = L_c + L_d;                        % Lunghezza totale dell'ugello
