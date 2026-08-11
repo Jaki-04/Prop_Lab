@@ -17,9 +17,7 @@ g_GC = Air.g_GC;
 R_GC = Air.R_GC;
 cp_GC = Air.cp_GC;
 
-[p_i, T_i, M_i, A_i] = Post_combustore();
-p_t7 = p_i*(1+M_i^2*(g_GC-1)/2)^(g_GC/(g_GC-1));
-T_t7 = T_i*(1+M_i^2*(g_GC-1)/2);
+[p_ti, T_ti, M_i, A_i] = Post_combustore();
 H_ram = 2*sqrt(A_i/pi);
 
 %% Ugello supersonico
@@ -29,13 +27,13 @@ H_ram = 2*sqrt(A_i/pi);
 Gamma = sqrt(g_GC) * (2 / (g_GC + 1))^((g_GC + 1) / (2 * (g_GC - 1)));
 
 % Dimensionamento della gola
-A_g = (m_tot * sqrt(R_GC * T_t7)) / (p_t7 * Gamma);
+A_g = (m_tot * sqrt(R_GC * T_ti)) / (p_ti * Gamma);
 
 %% Ugello di de Laval supersonico
 
 % Espansione isentropica da condizioni TOTALI
-p_t9=p_t7;
-T_t9=T_t7;
+p_t9=p_ti;
+T_t9=T_ti;
 T9  = @(p) T_t9 * (p / p_t9)^((g_GC-1)/g_GC);
 v9  = @(p) sqrt(2 * cp_GC * (T_t9 - T9(p)));
 M9  = @(p) v9(p) / sqrt(g_GC * R_GC * T9(p));
@@ -45,7 +43,10 @@ A_e = @(p) A_g * ratio_A(p);
 
 % Spinta netta (corretta se p_e = p0)
 Effective_thrust = @(p) m_tot * v9(p) - m_a * v0 + (p-p0)*A_e(p);
-pe=fsolve(@(p) Effective_thrust(p) - 65000, 5000);
+
+%pe=fsolve(@(p) Effective_thrust(p) - 64000, 5000);
+pe = 2549;
+Effective_thrust(p0)
 
 % Area di uscita
 T9 = T9(pe);
