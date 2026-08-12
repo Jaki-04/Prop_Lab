@@ -1,4 +1,4 @@
-function [pf, Tf, Mf, A_AB] = Post_combustore()
+function [p_t7, T_t7, Mf, A_AB] = Post_combustore()
 
 %% Dimensionamento post combustore
 
@@ -30,9 +30,8 @@ dhratio = 0.25;        %arbitrario
 % Temperatura totale all'uscita
 T_t7 = (cp_a * Ttot1 + f * H_f * eta_AB) / ((1 + f) * cp_GC);
 p_t7 = ptot1*pi_AB;
-Tf = T_t7/(1+M_i^2*(g_GC-1)/2);
-pf = p_t7 / ((1+M_i^2*(g_GC-1)/2)^(g_GC/(g_GC-1)));
-rhof = pf/(R_GC*Tf);
+Mf=0.418;
+
 
 % dimensioni post combustore
 % Attenzione a cos'è A_i, r_ram al momento è calcolato sbagliato
@@ -42,9 +41,6 @@ r_AB = sqrt(A_i/pi);
 H_AB = 2 * r_AB;
 L_AB= L_H_ratio * H_AB;
 A_AB=r_AB^2*pi;
-
-vf = m_a/(rhof*A_i);
-Mf = vf/sqrt(g_GC*R_GC*Tf);
 
 % dimensioni stabilizzatori di fiamma (ne metto 2)
 d_fh = dhratio * H_AB / (2*2);
