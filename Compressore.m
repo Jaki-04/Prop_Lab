@@ -43,18 +43,22 @@ M_In_stadio = M_In;
 beta_real = 1;
 N_stadi = 0;
 
-l_stadio = zeros(1, 10);
-stage_space = zeros(1, 10);
-r_hub = zeros(1, 10);
-cord_r = zeros(1, 10);
-spacing_r = zeros(1, 10);
-cord_s = zeros(1, 10);
-spacing_s = zeros(1, 10);
-bladeN_r = zeros(1, 10);
-bladeN_s = zeros(1, 10);
-gR = zeros(1, 10);
-Dr = zeros(1, 10);
-Ds = zeros(1, 10);
+l_stadio = zeros(1, 9);
+stage_space = zeros(1, 9);
+r_hub = zeros(1, 9);
+r_pitch = zeros(1,9);
+cord_r = zeros(1, 9);
+spacing_r = zeros(1, 9);
+cord_s = zeros(1, 9);
+spacing_s = zeros(1, 9);
+bladeN_r = zeros(1, 9);
+bladeN_s = zeros(1, 9);
+gR = zeros(1, 9);
+Dr = zeros(1, 9);
+Ds = zeros(1, 9);
+beta_vec = zeros(1,9);
+l_curr = zeros(1,9);
+Lav_vec = zeros(1,9);
 
 gamma_vec = zeros(10, 1);
 
@@ -65,6 +69,7 @@ while beta_real<beta
     
     % Triangolo di velocità per lo stadio corrente
     r_pitch_stadio = (r_t+r_h_stadio)/2;
+    r_pitch(N_stadi) = r_pitch_stadio;
     U_pitch_stadio = omega*r_pitch_stadio;
     W1 = sqrt(U_pitch_stadio.^2 + C_z1.^2);
     W2 = 0.72*W1;
@@ -75,7 +80,7 @@ while beta_real<beta
     
     % Lavoro dello stadio corrente 
     L_stadio = U_pitch_stadio*(Cteta2);
-
+    Lav_vec(N_stadi) = L_stadio;
     % Temperatura totale in uscita
     T_tIn_stadio = T_In_stadio*(1+M_In_stadio^2*(g-1)/2);
     T_tOut_stadio = L_stadio/cp + T_tIn_stadio;
@@ -129,7 +134,7 @@ while beta_real<beta
     l_s = cs_stadio/2*sin(atan(C_z1/(U_pitch_stadio-W2*cos(gamma))))+cs_stadio/2;   % Corda metà inclinata come C2 e metà orizzontale
     stage_space(N_stadi) = cs_stadio*0.35;      % https://journals.sagepub.com/doi/10.1177/0957650914531949
     l_stadio(N_stadi) = (l_s+l_r+stage_space(N_stadi));        
-     
+    l_curr(N_stadi+1) = l_curr(N_stadi) + l_stadio(N_stadi); 
     % Numero di pale
     
     Nr_stadio = (2*pi*r_pitch_stadio)/sr_stadio;
@@ -146,7 +151,7 @@ while beta_real<beta
     T_In_stadio = T_Out_stadio;
     p_tIn_stadio = p_tOut_stadio;
     M_In_stadio = M_Out_stadio;
-    
+    beta_vec(N_stadi)=b_stadio;
 end
 
 %svergolamento palette
@@ -159,3 +164,51 @@ M_Out = M_In_stadio;
 T_tOut = T_In_stadio*(1+M_Out^2*(g-1)/2);
 A_Out_Comp = A_In_stadio;
 L_compressore= sum(l_stadio)+stage_space(end);
+
+Stadi = linspace(1,9, 9);
+figure
+plot(Stadi, Lav_vec./sum(Lav_vec)*100, 'Color',[0.8500, 0.3250, 0.0980])
+ax = gca;
+ax.TickLabelInterpreter = 'latex';
+xlabel('$N^\circ$ dello stadio', 'Interpreter','latex')
+ylabel('$\%\frac{\mathcal{L}_{stadio}}{\mathcal{L}_{tot}}$', 'Interpreter','latex')
+grid on;
+ylim([8,13])
+r_hub
+figure;
+plot(beta_vec, 'Color',[0.8500, 0.3250, 0.0980], 'LineWidth',1)
+ax = gca;
+ax.TickLabelInterpreter = 'latex';
+xlabel('$N^\circ$ dello stadio', 'Interpreter','latex')
+ylabel('Rapporto di compressione dello stadio', 'Interpreter','latex')
+grid on;
+ylim([1.2,1.45])
+
+figure;
+hold on;
+grid on;
+plot(bladeN_r, 'Color',[0.8500, 0.3250, 0.0980], 'LineWidth',1)
+plot(bladeN_s, 'Color', [0, 0.4470, 0.7410], 'LineWidth',1)
+ax = gca;
+ax.TickLabelInterpreter = 'latex';
+xlabel('$N^\circ$ dello stadio', 'Interpreter','latex')
+ylabel('Numero di palette per schiera', 'Interpreter','latex')
+legend('Rotore', 'Statore')
+ax.Box = 'on';
+ylim([20,50])
+
+figure
+hold on
+plot(r_hub, 'k-', 'LineWidth',1)
+plot(r_t*ones(size(Stadi)), 'k-', 'LineWidth',1)
+plot(r_pitch, 'k--', 'LineWidth',1)
+ax = gca;
+ax.TickLabelInterpreter = 'latex';
+xlabel('$N^\circ$ dello stadio', 'Interpreter','latex')
+ylabel('Distanza radiale (m)', 'Interpreter','latex')
+grid on;
+text(2, 0.3, 'tip', 'Interpreter','latex')
+text(2, 0.3, 'hub', 'Interpreter','latex')
+text(2, 0.3, 'pitchline', 'Interpreter','latex')
+ax.Box = 'on';
+ylim([0.2,0.5])
