@@ -1,6 +1,6 @@
 %% Dimensionamento del compressore  (ford Kompressor)
 
-function [p_tOut, T_tOut, M_Out, A_Out_Comp, L_compressore] = Compressore()
+function [p_tOut, T_tOut, M_Out, A_Out_Comp, L_compressore] = Compressore(varargin)
 Air = Air_parameters();
 R = Air.R;
 g = Air.g;
@@ -165,6 +165,7 @@ T_tOut = T_In_stadio*(1+M_Out^2*(g-1)/2);
 A_Out_Comp = A_In_stadio;
 L_compressore= sum(l_stadio)+stage_space(end);
 
+if ismember('plot', varargin)
 Stadi = linspace(1,9, 9);
 figure
 plot(Stadi, Lav_vec./sum(Lav_vec)*100, 'Color',[0.8500, 0.3250, 0.0980])
@@ -174,7 +175,7 @@ xlabel('$N^\circ$ dello stadio', 'Interpreter','latex')
 ylabel('$\%\frac{\mathcal{L}_{stadio}}{\mathcal{L}_{tot}}$', 'Interpreter','latex')
 grid on;
 ylim([8,13])
-r_hub
+
 figure;
 plot(beta_vec, 'Color',[0.8500, 0.3250, 0.0980], 'LineWidth',1)
 ax = gca;
@@ -212,3 +213,4 @@ text(2, 0.3, 'hub', 'Interpreter','latex')
 text(2, 0.3, 'pitchline', 'Interpreter','latex')
 ax.Box = 'on';
 ylim([0.2,0.5])
+end
