@@ -30,8 +30,8 @@ T_Out_diff = Ttot_Out_diff/(1+M_Out_diff^2*(g_a-1)/2);
 rho_Out_diff = p_Out_diff/(R_a*T_Out_diff);
 
 AOut_diff = m_a/(rho_Out_diff*M_Out_diff*sqrt(g_a*R_a*T_Out_diff));
-deltar = fsolve(@(dr) pi*((RIn+dr)^2-(rIn-dr)^2)-AOut_diff, 0, options);
-ROut_diff = RIn+deltar;
+deltar = fsolve(@(dr) pi*((RIn)^2-(rIn-dr)^2)-AOut_diff, 0, options);
+ROut_diff = RIn;
 rOut_diff = rIn-deltar;
 teta = deg2rad(3);
 L_diff_cc = deltar/sin(teta);
