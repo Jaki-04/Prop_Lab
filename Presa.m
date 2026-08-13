@@ -285,18 +285,12 @@ r_in = Rmin_fun(Hin_sup);
 R_in = Rmax_fun(Hin_sup);
 L_sup = (R_in-ds*sin(delta3))/tan(a1+delta1)+ds*cos(delta3);    % Distanza dalla punta al cowl lip
 
-% Diffusore subsonico dopo l'onda normale
-M2 = 0.25;                                  % Mach target all'ingresso del postbruciatore
-eta_diff = 0.97;
-pi_presa = ((1+eta_diff*M_in^2*(g-1)/2)/(1+M_in^2*(g-1)/2))^(g/(g-1));    % Perdita di pressione totale
-
-T2 = Ttot1/(1+M2^2*(g-1)/2);
-v2 = M2*sqrt(R*g*T2);
-p2 = ptot1*pi_presa/((1+M2^2*(g-1)/2)^(g/(g-1)));
-rho2 = p2/(R*T2);
-
-Area_ratio_sup = rho1*v1/(rho2*v2);
-A2 = Area_ratio_sup*Ain_sup; 
+% Nessun diffusore per il subsonico
+T2=T1;
+p2=p1;
+rho2=rho1;
+A2=Ain_sup;
+M2=M_in;
 
 %% Presa subsonica
 
