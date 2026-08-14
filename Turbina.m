@@ -109,7 +109,7 @@ T_t2=247.9559;
 Pc = m_a*cp_a*(T_t3-T_t2);
 Pt = Pc / eta_m;
 
-T_t5cool = ((1 - eps_cool+f) * cp_GC * T_t4 + eps_cool * cp_a * T_t3 - Pt/ m_a) / ((1 - eps_cool) * cp_GC + eps_cool * cp_a);
+T_t5cool = ((1 - eps_cool+f) * cp_GC * T_t4 + eps_cool * cp_a * T_t3 - Pt/ m_a) / ((1 - eps_cool+f) * cp_GC + eps_cool * cp_a);
 taut = T_t5cool / T_t4;
 pi_t = taut ^ (g_GC / ((g_GC - 1) * e_t));
 
