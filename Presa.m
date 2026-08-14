@@ -285,7 +285,7 @@ r_in = Rmin_fun(Hin_sup);
 R_in = Rmax_fun(Hin_sup);
 L_sup = (R_in-ds*sin(delta3))/tan(a1+delta1)+ds*cos(delta3);    % Distanza dalla punta al cowl lip
 
-% Nessun diffusore per il subsonico
+% Nessun diffusore per il supersonico
 T2=T1;
 p2=p1;
 rho2=rho1;
