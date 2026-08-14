@@ -7,7 +7,7 @@ Air = Air_parameters('12000');
 subCruise = Subcruise_parameters();
 
 m_a = subCruise.m_a;
-f = subCruise.f;
+f = 0.0285;
 m_tot = m_a * (1 + f);
 v0 = subCruise.v0;
 

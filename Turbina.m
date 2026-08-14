@@ -4,7 +4,7 @@ subCruise = Subcruise_parameters();
 Air = Air_parameters('12000');
 
 m_a = subCruise.m_a;
-f = subCruise.f;
+f = 0.0285;
 cp_GC = Air.cp_GC;
 g_GC = Air.g_GC;
 cp_a = Air.cp;
@@ -16,8 +16,7 @@ eps_cool = 0.0245;
 m_0 = m_a * (1 + f);
 e_t = 0.9;
 
-T_t4=1420;
-P_t4=4.17e+05;
+[P_t4, T_t4]=Camera();
 
 %% Statore
 
@@ -43,7 +42,7 @@ alpha_ii = atan(Ct_ii / Cz_ii);
 alpha_ii_deg = rad2deg(alpha_ii);
 
 Astar = m_0 / (rhoii * Cii);
-r_t=0.487;
+r_t=0.4842;
 r_h_in = sqrt(r_t^2-Ai/pi);
 r_m_in=0.5*(r_t+r_h_in);
 
@@ -55,6 +54,7 @@ omega = 735.2970;   % da compressore
 Aii = m_0 / (rhoii * Cz_ii);
 r_h2 = sqrt(r_t^2-Aii/pi);
 r_m2=(r_h2+r_t)*0.5;
+h2=r_t-r_h2;
 U_m = omega * r_m2;
 
 Wii_z = Cz_ii;
@@ -100,6 +100,7 @@ Aiii = m_0 / (rhoiii * Wz_iii);
 % Geometria della pala in uscita
 r_h3 = sqrt(r_t^2-Aiii/pi);
 h3 = r_t-r_h3;
+r_p3=(r_h3+r_t)*0.5;
 
 %% Sezione di scarico
 
@@ -120,7 +121,5 @@ rho5 = p_5 / (R_GC * T_5cool);
 A5 = m_0 / (rho5 * Cz_ii);
 
 r_h_exit = sqrt(r_t^2-A5/pi);
-h5 = r_t-r_h_exit;
 
 N_stadi=Pt/(w_stadio*m_0);
-

@@ -1,9 +1,8 @@
-function [p_Out_cc, T_Out_cc, MOut] = Camera()
+function [ptot_Out_cc, Ttot_Out_cc, MOut] = Camera()
 
 
 S = Subcruise_parameters();
 m_a = S.m_a;
-f = S.f;
 options = optimoptions('fsolve','Display','none');
 [ptot_In, Ttot_In, MIn, AIn] = Compressore();
 
@@ -75,7 +74,7 @@ M_ref = U_ref/(g_a*R_a*T_In)^0.5; % Mach di riferimento
 
 Dp_cold = 0.06 * ptot_In;
 Dp_hot = q_ref * (T_Out_cc/T_In-1);
-ptot_Out_cc = ptot_In - Dp_cold - Dp_hot
+ptot_Out_cc = ptot_In - Dp_cold - Dp_hot;
 p_Out_cc = ptot_Out_cc/(1+MOut^2*(g_a-1)/2)^(g_a/(g_a-1));
 
 % Dp_cold_verifica = DP_qref+0.5*R_a*((m_a*T_In^0.5)/(Aref*p_In))^2*p_In;
