@@ -46,7 +46,9 @@ MOut = 0.5;     % Mach in ingresso alla turbina
 % Temperatura totale in uscita
 g_GC = Air.g_GC;
 cp_GC = Air.cp_GC;
-Ttot_Out_cc= ((1-eps_cool)*cp_a*Ttot_Out_diff + f * H_f*eta_b)./((1+f-eps_cool)*cp_GC);
+Ttot_Out_cc =@(f) ((1-eps_cool)*cp_a*Ttot_Out_diff + f * H_f*eta_b)./((1+f-eps_cool)*cp_GC);
+f=fsolve(@(f) Ttot_Out_cc(f) - 1420, 0.0294);
+Ttot_Out_cc = Ttot_Out_cc(f);
 T_Out_cc = Ttot_Out_cc/(1+MOut^2*(g_a-1)/2);
 
 % Valori (dalle slide)
@@ -73,7 +75,7 @@ M_ref = U_ref/(g_a*R_a*T_In)^0.5; % Mach di riferimento
 
 Dp_cold = 0.06 * ptot_In;
 Dp_hot = q_ref * (T_Out_cc/T_In-1);
-ptot_Out_cc = ptot_In - Dp_cold - Dp_hot;
+ptot_Out_cc = ptot_In - Dp_cold - Dp_hot
 p_Out_cc = ptot_Out_cc/(1+MOut^2*(g_a-1)/2)^(g_a/(g_a-1));
 
 % Dp_cold_verifica = DP_qref+0.5*R_a*((m_a*T_In^0.5)/(Aref*p_In))^2*p_In;
