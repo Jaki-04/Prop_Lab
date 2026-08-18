@@ -201,12 +201,13 @@ ylim([20,50])
 
 figure
 hold on
-plot(r_hub, 'k-', 'LineWidth',1)
-plot(r_t*ones(size(Stadi)), 'k-', 'LineWidth',1)
-plot(r_pitch, 'k--', 'LineWidth',1)
+plot([r_hub, r_he], 'k-', 'LineWidth',1)
+plot(r_t*ones(max(size(Stadi))+1,1), 'k-', 'LineWidth',1)
+plot([r_pitch, (r_he+r_t)*0.5], 'k--', 'LineWidth',1)
 ax = gca;
 ax.TickLabelInterpreter = 'latex';
-xlabel('$N^\circ$ dello stadio', 'Interpreter','latex')
+xl=xlabel('$N^\circ$ dello stadio', 'Interpreter','latex')
+xl.Position(2)=xl.Position(2)-0.0005;
 ylabel('Distanza radiale (m)', 'Interpreter','latex')
 grid on;
 text(2, 0.3, 'tip', 'Interpreter','latex')
@@ -214,4 +215,12 @@ text(2, 0.3, 'hub', 'Interpreter','latex')
 text(2, 0.3, 'pitchline', 'Interpreter','latex')
 ax.Box = 'on';
 ylim([0.2,0.5])
+t_ticks = 1:10;
+set(gca, 'XTick', t_ticks);
+t_midpoints = t_ticks(1:end-1) + diff(t_ticks)/2;
+set(gca, 'XTickLabel', []);
+labels = {'$1^\circ$', '$2^\circ$', '$3^\circ$', '$4^\circ$', '$5^\circ$', '$6^\circ$', '$7^\circ$', '$8^\circ$', '$9^\circ$'};
+text(t_midpoints, repmat(min(ylim), size(t_midpoints)), labels, ...
+    'HorizontalAlignment', 'center', ...
+    'VerticalAlignment', 'top', 'Interpreter','latex');
 end
