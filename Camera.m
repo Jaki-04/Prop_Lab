@@ -32,7 +32,7 @@ AOut_diff = m_a/(rho_Out_diff*M_Out_diff*sqrt(g_a*R_a*T_Out_diff));
 deltar = fsolve(@(dr) pi*((RIn)^2-(rIn-dr)^2)-AOut_diff, 0, options);
 ROut_diff = RIn;
 rOut_diff = rIn-deltar;
-teta = deg2rad(3);
+teta = deg2rad(3.5);
 L_diff_cc = deltar/sin(teta);
 WLratio_diff = L_diff_cc/(RIn-rIn);
 

@@ -164,6 +164,7 @@ M_Out = M_In_stadio;
 T_tOut = T_In_stadio*(1+M_Out^2*(g-1)/2);
 A_Out_Comp = A_In_stadio;
 L_compressore= sum(l_stadio)+stage_space(end);
+r_he = sqrt(r_t^2-A_Out_Comp/pi);
 
 if ismember('plot', varargin)
 Stadi = linspace(1,9, 9);
