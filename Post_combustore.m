@@ -29,9 +29,11 @@ L_H_ratio = 2.2;        %arbitrario
 dhratio = 0.25;        %arbitrario
 
 % Temperatura totale all'uscita
-T_t7 = (cp_a * Ttot1 + f * H_f * eta_AB) / ((1 + f) * cp_GC);
+T_t7 =@(f) (cp_a*Ttot1 + f * H_f*eta_AB)./((1+f)*cp_GC);
+f=fsolve(@(f) T_t7(f) - 1871, 0.038);
+T_t7 = T_t7(f);
 p_t7 = ptot1*pi_AB;
-Mf=0.475;
+Mf=0.434;
 
 
 % dimensioni condotti di bypass

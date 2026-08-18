@@ -13,7 +13,7 @@ Air.R=287.05;
 
 if ismember('25000', varargin)
     Air.p= 2549; 
-    Air.T= 216.65;
+    Air.T= 221.65;
     Air.rho = Air.p/(Air.R*Air.T);
 elseif ismember ('12000', varargin)
     Air.p= 19267; 

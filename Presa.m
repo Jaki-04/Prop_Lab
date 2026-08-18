@@ -16,9 +16,9 @@ options = optimoptions('fsolve','Display','none');
 options2 = optimoptions('fminunc','Display','none');
 
 % Angoli del cono e i due angoli di rampa su cui ciclare
-cone_angles = deg2rad(10:0.2:13);
-ramp_angles1 = deg2rad(13:0.2:16);
-ramp_angles2 = deg2rad(16:0.2:19);
+cone_angles = deg2rad(11:0.1:12);
+ramp_angles1 = deg2rad(14:0.1:15);
+ramp_angles2 = deg2rad(17:0.1:18);
 
 % Inizializzazione parametri
 ptot_grid = zeros(length(cone_angles), length(ramp_angles1), length(ramp_angles1));

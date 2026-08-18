@@ -8,7 +8,7 @@ Air = Air_parameters('25000');
 supCruise = Supercruise_parameters();
 
 m_a = supCruise.m_a;
-f = supCruise.f;
+f = 0.0391;
 m_tot = m_a * (1 + f);
 v0 = supCruise.v0;
 
