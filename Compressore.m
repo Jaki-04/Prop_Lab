@@ -206,7 +206,7 @@ plot(r_t*ones(max(size(Stadi))+1,1), 'k-', 'LineWidth',1)
 plot([r_pitch, (r_he+r_t)*0.5], 'k--', 'LineWidth',1)
 ax = gca;
 ax.TickLabelInterpreter = 'latex';
-xl=xlabel('$N^\circ$ dello stadio', 'Interpreter','latex')
+xl=xlabel('$N^\circ$ dello stadio', 'Interpreter','latex');
 xl.Position(2)=xl.Position(2)-0.0005;
 ylabel('Distanza radiale (m)', 'Interpreter','latex')
 grid on;
