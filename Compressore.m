@@ -132,7 +132,7 @@ while beta_real<beta
     % Lunghezza approssimativa dello stadio 
     l_r = cr_stadio*cos(pi/2-gamma);                                                % Corda inclinata uguale a W2;
     l_s = cs_stadio/2*sin(atan(C_z1/(U_pitch_stadio-W2*cos(gamma))))+cs_stadio/2;   % Corda metà inclinata come C2 e metà orizzontale
-    stage_space(N_stadi) = cs_stadio*0.35;      % https://journals.sagepub.com/doi/10.1177/0957650914531949
+    stage_space(N_stadi) = cs_stadio*0.25;      
     l_stadio(N_stadi) = (l_s+l_r+stage_space(N_stadi));        
     l_curr(N_stadi+1) = l_curr(N_stadi) + l_stadio(N_stadi); 
     % Numero di pale
