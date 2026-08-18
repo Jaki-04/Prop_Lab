@@ -123,3 +123,5 @@ A5 = m_0 / (rho5 * Cz_ii);
 r_h_exit = sqrt(r_t^2-A5/pi);
 
 N_stadi=Pt/(w_stadio*m_0);
+
+L_tb = 0.1181*2 + 1.5*(r_t-r_h_exit);
