@@ -50,7 +50,7 @@ rhoe = pe./(R_GC*Te);
 % Parametri di merito
 I_sp_a = ((1+f).*ve-v0_supercruise);
 TSFC=(f./I_sp_a)*1000*3600;
-TSFCmax = 24000*3600/((5000/1.0327)*65);
+TSFCmax = 24000*3600/((5000000/v0_supercruise)*65);
 %D_e = 2*sqrt((65000./I_sp_a)./(rhoe.*ve*pi));
 
 TSFC(I_sp_a <= 0) = NaN;
@@ -104,6 +104,7 @@ yticks(yt);
 ytl = "$" + string(yt) + "$";
 ytl(abs(yt - TSFCmax) < 1e-6) = "$TSFC_{\mathrm{max}}$";
 yticklabels(ytl);
+
 
 figure()
 plot(Ttot2, I_sp_a,'Linewidth', 1.5)
